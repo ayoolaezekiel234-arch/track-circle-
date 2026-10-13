@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Circle - Login</title>
+    <!-- Include Supabase JS Library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { text-align: center; margin-bottom: 20px; color: #38bdf8; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; margin: 10px 0; background: #38bdf8; border: none; border-radius: 6px; color: #0f172a; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0ea5e9; }
+        .switch { text-align: center; margin-top: 15px; font-size: 14px; color: #94a3b8; cursor: pointer; }
+        .switch span { color: #38bdf8; text-decoration: underline; }
+        #message { text-align: center; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 id="form-title">Welcome to Track Circle</h2>
+        <input type="email" id="email" placeholder="Enter your email" />
+        <input type="password" id="password" placeholder="Enter your password" />
+        <button id="action-btn" onclick="handleAuth()">Sign Up</button>
+        <div class="switch" onclick="toggleMode()">Already have an account? <span>Log In</span></div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // 1. Initialize Supabase with your project credentials
+        const SUPABASE_URL = 'https://kthhdwaqqhqioxvfhjlx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aGhkd2FxchqioxvfhjlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MjIwMzQsImV4cCI6MjEwNzQ5ODAzNH0.lJyrG_lKfBW0G3o2cgkm_AiBqw19e9Go8c3TW-BPm20';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let isLoginMode = false;
+
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('form-title').innerText = isLoginMode ? 'Log In to Track Circle' : 'Welcome to Track Circle';
+            document.getElementById('action-btn').innerText = isLoginMode ? 'Log In' : 'Sign Up';
+            document.querySelector('.switch').innerHTML = isLoginMode ? 
+                'Don\'t have an account? <span>Sign Up</span>' : 
+                'Already have an account? <span>Log In</span>';
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgEl = document.getElementById('message');
+
+            if (!email || !password) {
+                msgEl.style.color = '#f87171';
+                msgEl.innerText = 'Please fill in all fields!';
+                return;
+            }
+
+            msgEl.style.color = '#38bdf8';
+            msgEl.innerText = 'Processing...';
+
+            if (isLoginMode) {
+                // Log In Logic
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    msgEl.style.color = '#f87171';
+                    msgEl.innerText = error.message;
+                } else {
+                    msgEl.style.color = '#4ade80';
+                    msgEl.innerText = 'Login successful! Redirecting...';
+                    // Later we redirect to the main app dashboard here
+                }
+            } else {
+                // Sign Up Logic
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) {
+                    msgEl.style.color = '#f87171';
+                    msgEl.innerText = error.message;
+                } else {
+                    msgEl.style.color = '#4ade80';
+                    msgEl.innerText = 'Signup successful! Check your email or log in.';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
