@@ -19,11 +19,10 @@
             overflow: hidden;
         }
 
-        /* --- SPLASH SCREEN STYLES --- */
+        /* --- SPLASH SCREEN --- */
         #splash-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            /* Shining dynamic sky and glowing trees atmosphere */
             background: linear-gradient(135deg, #050b14 0%, #0f172a 50%, #1e1b4b 100%);
             display: flex;
             flex-direction: column;
@@ -43,39 +42,19 @@
             0% { transform: scale(1); opacity: 0.5; }
             100% { transform: scale(1.3); opacity: 1; }
         }
-        .splash-content {
-            position: relative;
-            text-align: center;
-            z-index: 2;
-        }
+        .splash-content { position: relative; text-align: center; z-index: 2; }
         .splash-logo {
-            font-size: 36px;
-            font-weight: 800;
+            font-size: 38px; font-weight: 800;
             background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
-            animation: fadeInScale 1.2s ease-out;
         }
-        .splash-sub {
-            font-size: 14px;
-            color: #94a3b8;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-        @keyframes fadeInScale {
-            0% { transform: translateY(15px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
+        .splash-sub { font-size: 13px; color: #94a3b8; letter-spacing: 3px; text-transform: uppercase; }
 
-        /* --- MAIN APP AUTH SCREEN --- */
+        /* --- AUTH SCREEN --- */
         #auth-container {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.8s ease;
+            display: none;
             width: 100%;
-            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -85,103 +64,64 @@
             padding: 30px;
             border-radius: 16px;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             border: 1px solid #1f2937;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #38bdf8;
-            font-size: 22px;
-        }
-
-        /* Social Auth Buttons */
-        .social-btn {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #1f2937;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: background 0.2s;
-        }
-        .social-btn:hover { background: #374151; }
-        .social-btn img { width: 18px; height: 18px; }
-
-        .separator {
-            display: flex;
-            align-items: center;
-            color: #6b7280;
-            font-size: 13px;
-            margin: 20px 0;
-        }
-        .separator::before, .separator::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid #374151;
-        }
-        .separator::before { margin-right: 10px; }
-        .separator::after { margin-left: 10px; }
+        h2 { text-align: center; margin-bottom: 25px; color: #38bdf8; font-size: 22px; }
 
         input {
-            width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 14px;
-            background: #080a10;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 15px;
+            width: 100%; padding: 12px 16px; margin-bottom: 16px;
+            background: #080a10; border: 1px solid #374151; border-radius: 8px; color: #fff; font-size: 15px;
         }
         input:focus { outline: none; border-color: #6366f1; }
 
         button#action-btn {
-            width: 100%;
-            padding: 12px;
-            background: #6366f1;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
+            width: 100%; padding: 12px; background: #6366f1; border: none; border-radius: 8px;
+            color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px;
             transition: background 0.2s;
-            margin-top: 5px;
         }
         button#action-btn:hover { background: #4f46e5; }
+        .switch { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
+        .switch span { color: #38bdf8; cursor: pointer; text-decoration: underline; font-weight: 500; }
+        #message { text-align: center; margin-top: 15px; font-size: 14px; }
 
-        .switch {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #94a3b8;
+        /* --- DASHBOARD APP SCREEN --- */
+        #app-dashboard {
+            display: none;
+            width: 100%; height: 100vh;
+            flex-direction: column;
+            background: #080a10;
         }
-        .switch span {
-            color: #38bdf8;
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: underline;
+        .app-header {
+            padding: 15px 20px; background: #111827; border-bottom: 1px solid #1f2937;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        #message {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            min-height: 20px;
+        .app-header h1 { font-size: 18px; color: #38bdf8; }
+        .logout-btn { background: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px; }
+        
+        .app-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; width: 100%; max-width: 600px; margin: 0 auto; }
+        
+        /* Chat styles */
+        .chat-box { width: 100%; flex: 1; background: #111827; border-radius: 12px; border: 1px solid #1f2937; display: flex; flex-direction: column; overflow: hidden; margin-top: 10px; }
+        .messages-list { flex: 1; padding: 15px; overflow-y: auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+        .message-item { background: #1f2937; padding: 10px 14px; border-radius: 8px; max-width: 80%; font-size: 14px; }
+        .message-item span { display: block; font-size: 11px; color: #38bdf8; margin-bottom: 4px; font-weight: bold; }
+        .chat-input-area { display: flex; padding: 10px; background: #0f172a; border-top: 1px solid #1f2937; gap: 10px; }
+        .chat-input-area input { margin: 0; flex: 1; }
+        .chat-input-area button { width: 80px; margin: 0; background: #38bdf8; border: none; border-radius: 8px; color: #080a10; font-weight: bold; cursor: pointer; }
+
+        .nav-bar {
+            height: 65px; background: #111827; border-top: 1px solid #1f2937;
+            display: flex; justify-content: space-around; align-items: center;
         }
+        .nav-item { color: #94a3b8; font-size: 13px; cursor: pointer; background: none; border: none; }
+        .nav-item.active { color: #38bdf8; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- 1. SPLASH SCREEN (Shining Sky & Trees Vibe) -->
+    <!-- SPLASH -->
     <div id="splash-screen">
         <div class="sky-glow"></div>
         <div class="splash-content">
@@ -190,120 +130,198 @@
         </div>
     </div>
 
-    <!-- 2. MAIN APP AUTHENTICATION SCREEN -->
+    <!-- AUTH SCREEN -->
     <div id="auth-container">
         <div class="card">
             <h2 id="form-title">Welcome to Track Circle</h2>
-
-            <!-- Real OAuth Social Logins (Connected to Supabase Provider Handlers) -->
-            <button class="social-btn" onclick="socialLogin('google')">
-                <img src="https://authjs.dev/img/providers/google.svg" alt="Google"> Continue with Google
-            </button>
-            <button class="social-btn" onclick="socialLogin('apple')">
-                <img src="https://authjs.dev/img/providers/apple.svg" alt="Apple"> Continue with Apple
-            </button>
-
-            <div class="separator">or use email</div>
-
-            <!-- Email & Password Inputs -->
             <input type="email" id="email" placeholder="Email Address" />
             <input type="password" id="password" placeholder="Password" />
-            
             <button id="action-btn" onclick="handleAuth()">Sign Up</button>
-
-            <div class="switch" id="bottom-switch">
-                Already have an account? <span onclick="toggleMode()">Log In</span>
-            </div>
-
+            <div class="switch" id="bottom-switch">Already have an account? <span onclick="toggleMode()">Log In</span></div>
             <div id="message"></div>
         </div>
     </div>
 
-    <script>
-        // --- 2-SECOND SPLASH SCREEN TIMER ---
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                const auth = document.getElementById('auth-container');
-                
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-                
-                auth.style.opacity = '1';
-                auth.style.visibility = 'visible';
-            }, 2000); // 2000 milliseconds = exactly 2 seconds
-        });
+    <!-- MAIN DASHBOARD -->
+    <div id="app-dashboard">
+        <div class="app-header">
+            <h1 id="screen-title">📍 Track Map</h1>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+        <div class="app-content" id="main-view-area">
+            <h3>Live Location Sharing Active</h3>
+            <p id="location-status" style="color: #94a3b8; margin-top: 10px;">GPS Connected & Syncing...</p>
+            <button onclick="shareLocation()" style="margin-top: 20px; padding: 10px 20px; background: #38bdf8; border: none; border-radius: 8px; color: #080a10; font-weight: bold; cursor: pointer;">Update & Sync Location</button>
+        </div>
+        <div class="nav-bar">
+            <button class="nav-item active" onclick="switchTab('track', this)">Track</button>
+            <button class="nav-item" onclick="switchTab('spotlight', this)">Spotlight</button>
+            <button class="nav-item" onclick="switchTab('dms', this)">DMs & Groups</button>
+            <button class="nav-item" onclick="switchTab('profile', this)">Profile</button>
+        </div>
+    </div>
 
-        // --- SUPABASE CONFIGURATION ---
+    <script>
         const SUPABASE_URL = 'https://kthhdwaqqhqioxvfhjlx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aGhkd2FxcWhxaW94dmZoamx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MjIwMzQsImV4cCI6MjEwNzQ5ODAzNH0.lJyrG_lKfBW0G3o2cgkm_AiBqw19e9Go8c3TW-BPm20';
-        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let isLoginMode = false;
+        window.addEventListener('load', async () => {
+            setTimeout(async () => {
+                document.getElementById('splash-screen').style.opacity = '0';
+                document.getElementById('splash-screen').style.visibility = 'hidden';
 
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    showDashboard();
+                } else {
+                    document.getElementById('auth-container').style.display = 'flex';
+                }
+            }, 2000);
+        });
+
+        let isLoginMode = false;
         function toggleMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('form-title').innerText = isLoginMode ? 'Welcome Back' : 'Welcome to Track Circle';
             document.getElementById('action-btn').innerText = isLoginMode ? 'Log In' : 'Sign Up';
-            document.getElementById('bottom-switch').innerHTML = isLoginMode ? 
-                'Don\'t have an account? <span onclick="toggleMode()">Sign Up</span>' : 
-                'Already have an account? <span onclick="toggleMode()">Log In</span>';
+            document.getElementById('bottom-switch').innerHTML = isLoginMode ? 'Don\'t have an account? <span onclick="toggleMode()">Sign Up</span>' : 'Already have an account? <span onclick="toggleMode()">Log In</span>';
             document.getElementById('message').innerText = '';
         }
 
-        // --- EMAIL / PASSWORD AUTH HANDLER ---
         async function handleAuth() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const msgEl = document.getElementById('message');
 
-            if (!email || !password) {
-                msgEl.style.color = '#f87171';
-                msgEl.innerText = 'Please fill in both email and password!';
-                return;
-            }
-
+            if (!email || !password) { msgEl.style.color = '#f87171'; msgEl.innerText = 'Fill in all fields!'; return; }
             msgEl.style.color = '#38bdf8';
             msgEl.innerText = 'Processing...';
 
             if (isLoginMode) {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) {
-                    msgEl.style.color = '#f87171';
-                    msgEl.innerText = error.message;
-                } else {
-                    msgEl.style.color = '#4ade80';
-                    msgEl.innerText = 'Login successful! Welcome to Track Circle.';
-                }
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) { msgEl.style.color = '#f87171'; msgEl.innerText = error.message; }
+                else { showDashboard(); }
             } else {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                if (error) {
-                    msgEl.style.color = '#f87171';
-                    msgEl.innerText = error.message;
-                } else {
-                    msgEl.style.color = '#4ade80';
-                    msgEl.innerText = 'Signup successful! Check your email to confirm.';
-                }
+                const { error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) { msgEl.style.color = '#f87171'; msgEl.innerText = error.message; }
+                else { msgEl.style.color = '#4ade80'; msgEl.innerText = 'Signup successful! Logging you in...'; showDashboard(); }
             }
         }
 
-        // --- SOCIAL OAUTH HANDLER (Google & Apple) ---
-        async function socialLogin(providerName) {
-            const msgEl = document.getElementById('message');
-            msgEl.style.color = '#38bdf8';
-            msgEl.innerText = `Connecting to ${providerName}...`;
+        function showDashboard() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-dashboard').style.display = 'flex';
+            shareLocation();
+        }
 
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: providerName,
-                options: {
-                    redirectTo: window.location.origin
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
+        }
+
+        // --- GPS SYNC ---
+        async function shareLocation() {
+            const statusEl = document.getElementById('location-status');
+            if (!navigator.geolocation) { statusEl.innerText = 'Geolocation not supported'; return; }
+            statusEl.innerText = 'Getting GPS coordinates...';
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return;
+
+                const { error } = await supabaseClient
+                    .from('user_locations')
+                    .upsert({ user_id: user.id, latitude: lat, longitude: lon, updated_at: new Date() }, { onConflict: 'user_id' });
+
+                if (!error) {
+                    statusEl.style.color = '#4ade80';
+                    statusEl.innerText = `Synced! Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
                 }
-            });
+            }, () => { statusEl.style.color = '#f87171'; statusEl.innerText = 'Location permission denied.'; });
+        }
+
+        // --- CHAT SYSTEM (PHASE 3) ---
+        async function loadChat() {
+            const viewEl = document.getElementById('main-view-area');
+            viewEl.innerHTML = `
+                <div class="chat-box">
+                    <div class="messages-list" id="msg-list">Loading messages...</div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Type a message..." />
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            `;
+            await fetchMessages();
+        }
+
+        async function fetchMessages() {
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(50);
+
+            const listEl = document.getElementById('msg-list');
+            if (!listEl) return;
 
             if (error) {
-                msgEl.style.color = '#f87171';
-                msgEl.innerText = error.message;
+                listEl.innerHTML = `<p style="color: #f87171;">Error loading messages: ${error.message}</p>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            data.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'message-item';
+                div.innerHTML = `<span>${msg.sender_email}</span>${msg.content}`;
+                listEl.appendChild(div);
+            });
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabaseClient.from('messages').insert({
+                sender_email: user.email,
+                content: text
+            });
+
+            if (!error) {
+                inputEl.value = '';
+                fetchMessages();
+            }
+        }
+
+        // --- NAVIGATION TABS ---
+        function switchTab(tab, el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            const titleEl = document.getElementById('screen-title');
+            const viewEl = document.getElementById('main-view-area');
+
+            if (tab === 'track') {
+                titleEl.innerText = '📍 Track Map';
+                viewEl.innerHTML = `<h3>Live Location Sharing Active</h3><p id="location-status" style="color: #94a3b8; margin-top: 10px;">GPS Connected</p><button onclick="shareLocation()" style="margin-top: 20px; padding: 10px 20px; background: #38bdf8; border: none; border-radius: 8px; color: #080a10; font-weight: bold; cursor: pointer;">Update & Sync Location</button>`;
+                shareLocation();
+            } else if (tab === 'spotlight') {
+                titleEl.innerText = '✨ Spotlight Feed';
+                viewEl.innerHTML = `<h3>Short-Form Video Feed</h3><p style="color: #94a3b8; margin-top: 10px;">TikTok / Spotlight video feed ready for integration.</p>`;
+            } else if (tab === 'dms') {
+                titleEl.innerText = '💬 Messages & Groups';
+                loadChat();
+            } else if (tab === 'profile') {
+                titleEl.innerText = '⚙️ Profile & Status';
+                viewEl.innerHTML = `<h3>Your Account Settings</h3><p style="color: #94a3b8; margin-top: 10px;">Manage profile picture, status, and terms & conditions.</p>`;
             }
         }
     </script>
