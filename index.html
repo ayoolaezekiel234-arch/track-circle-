@@ -19,102 +19,141 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* --- CINEMATIC SPLASH & ONBOARDING --- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #05080c 0%, var(--bg-main) 50%, #111e18 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-        .splash-glow {
-            position: absolute; width: 320px; height: 320px;
-            background: radial-gradient(circle, rgba(25,230,160,0.15) 0%, rgba(8,11,16,0) 70%);
-            border-radius: 50%; animation: pulseGlow 3s infinite alternate;
-        }
-        @keyframes pulseGlow { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.3); opacity: 1; } }
-        .splash-content { position: relative; text-align: center; z-index: 2; padding: 0 20px; }
-        .splash-logo {
-            font-size: 42px; font-weight: 900; letter-spacing: 1px;
-            background: linear-gradient(90deg, #F7FAF9, var(--accent-mint));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;
-        }
-        .splash-tagline { font-size: 14px; color: var(--text-secondary); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 30px; }
-
-        /* --- AUTH SCREEN --- */
+        /* --- CINEMATIC ONBOARDING SCREEN (Screenshot 2 Style) --- */
         #auth-container {
-            display: none; width: 100%; height: 100vh;
-            justify-content: center; align-items: center; padding: 20px; background: var(--bg-main);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: linear-gradient(rgba(8,11,16,0.75), rgba(8,11,16,0.92)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80') no-repeat center center/cover;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; z-index: 999;
+            padding: 30px 20px; transition: opacity 0.6s ease, visibility 0.6s ease;
         }
-        .card {
-            background: var(--bg-card); padding: 35px 25px; border-radius: 20px;
-            width: 100%; max-width: 420px; border: 1px solid var(--border-color);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        .onboard-header {
+            position: absolute; top: 15%; text-align: center; width: 100%; padding: 0 20px;
         }
-        h2 { text-align: center; margin-bottom: 8px; color: var(--text-main); font-size: 24px; font-weight: 800; }
-        .card-sub { text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 25px; }
+        .logo-circle {
+            width: 70px; height: 70px; border: 3px solid var(--accent-mint); border-radius: 50%;
+            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px rgba(25,230,160,0.4); background: rgba(8,11,16,0.6);
+        }
+        .logo-circle svg { width: 36px; height: 36px; fill: var(--accent-mint); }
+        .onboard-title { font-size: 30px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); margin-bottom: 6px; }
+        .onboard-title span { color: var(--accent-mint); }
+        .onboard-tagline { font-size: 13px; color: var(--text-secondary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
         
+        .feature-pills { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; }
+        .feature-pill { text-align: center; color: var(--text-secondary); font-size: 11px; }
+        .feature-pill svg { width: 22px; height: 22px; fill: var(--accent-mint); margin-bottom: 6px; display: block; margin-left: auto; margin-right: auto; }
+
+        .auth-card {
+            background: var(--bg-card); padding: 25px 20px; border-radius: 24px;
+            width: 100%; max-width: 420px; border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        .pill-btn {
+            width: 100%; padding: 14px; border-radius: 30px; font-size: 15px; font-weight: 700;
+            cursor: pointer; text-align: center; border: none; margin-bottom: 12px; transition: opacity 0.2s;
+        }
+        .btn-mint { background: var(--accent-mint); color: var(--bg-main); box-shadow: 0 4px 20px rgba(25,230,160,0.3); }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+        .auth-separator { display: flex; align-items: center; color: var(--text-secondary); font-size: 12px; margin: 15px 0; }
+        .auth-separator::before, .auth-separator::after { content: ""; flex: 1; border-bottom: 1px solid var(--border-color); }
+        .auth-separator::before { margin-right: 10px; } .auth-separator::after { margin-left: 10px; }
+
+        /* Form view inside auth card */
+        #auth-form-view { display: none; }
         input {
-            width: 100%; padding: 14px 16px; margin-bottom: 16px;
+            width: 100%; padding: 14px 16px; margin-bottom: 12px;
             background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px;
-            color: var(--text-main); font-size: 15px; transition: border-color 0.2s;
+            color: var(--text-main); font-size: 15px;
         }
         input:focus { outline: none; border-color: var(--accent-mint); }
-        
-        button.primary-btn {
-            width: 100%; padding: 14px; background: var(--accent-mint); border: none; border-radius: 12px;
-            color: var(--bg-main); font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 5px;
-            transition: opacity 0.2s; box-shadow: 0 4px 15px rgba(25,230,160,0.3);
-        }
-        button.primary-btn:hover { opacity: 0.9; }
-        .switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary); }
-        .switch span { color: var(--accent-mint); cursor: pointer; text-decoration: underline; font-weight: 600; }
-        #message { text-align: center; margin-top: 15px; font-size: 14px; min-height: 20px; }
 
-        /* --- MAIN DASHBOARD APP --- */
+        /* --- MAIN APP DASHBOARD (Screenshot 1 Style) --- */
         #app-dashboard {
             display: none; width: 100%; height: 100vh;
-            flex-direction: column; background: var(--bg-main); position: relative;
+            flex-direction: column; background: var(--bg-main); position: relative; overflow: hidden;
         }
         .app-header {
-            padding: 15px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px; background: var(--bg-main); border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; z-index: 10;
         }
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .header-brand h1 { font-size: 18px; font-weight: 800; color: var(--accent-mint); letter-spacing: 0.5px; }
-        .user-greeting { font-size: 12px; color: var(--text-secondary); }
-
-        /* --- CONTENT SECTIONS --- */
-        .app-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 90px; }
-        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; color: var(--text-main); }
-        
-        /* Map / GPS Card */
-        .gps-card {
-            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
-            padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-avatar { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--accent-mint); object-fit: cover; }
+        .header-titles h1 { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+        .header-titles h1 span { color: var(--accent-mint); font-size: 11px; font-weight: 600; background: rgba(25,230,160,0.1); padding: 2px 6px; border-radius: 6px; }
+        .header-titles p { font-size: 11px; color: var(--text-secondary); }
+        .header-actions { display: flex; gap: 10px; }
+        .icon-btn {
+            width: 36px; height: 36px; background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
+            position: relative;
         }
-        .gps-status { color: var(--accent-mint); font-weight: 600; margin: 10px 0; font-size: 14px; }
-        
-        /* Chat Feed */
-        .chat-box { width: 100%; flex: 1; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; min-height: 350px; }
-        .messages-list { flex: 1; padding: 15px; overflow-y: auto; text-align: left; display: flex; flex-direction: column; gap: 12px; }
-        .message-item { background: #182232; padding: 12px 16px; border-radius: 12px; max-width: 85%; font-size: 14px; border: 1px solid var(--border-color); }
-        .message-item span { display: block; font-size: 11px; color: var(--accent-mint); margin-bottom: 4px; font-weight: 700; }
-        .chat-input-area { display: flex; padding: 12px; background: var(--bg-main); border-top: 1px solid var(--border-color); gap: 10px; }
-        .chat-input-area input { margin: 0; flex: 1; }
-        .chat-input-area button { width: 90px; margin: 0; background: var(--accent-mint); border: none; border-radius: 10px; color: var(--bg-main); font-weight: 800; cursor: pointer; }
+        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .notification-badge { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; }
 
-        /* Profile & Settings Card */
-        .profile-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; text-align: center; }
-        .avatar-circle { width: 80px; height: 80px; background: #1c293d; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--accent-mint); font-weight: 800; border: 2px solid var(--accent-mint); }
+        /* Scrollable Feed Area */
+        .app-content { flex: 1; padding: 15px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-bottom: 90px; }
 
-        /* --- BOTTOM NAVIGATION BAR --- */
+        /* Top Grid Cards: Greeting & Live Map Preview */
+        .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .dash-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; position: relative; }
+        .sharing-pill {
+            display: inline-flex; align-items: center; gap: 6px; background: rgba(25,230,160,0.1);
+            border: 1px solid rgba(25,230,160,0.3); padding: 6px 12px; border-radius: 20px; font-size: 11px; color: var(--accent-mint); font-weight: 600; margin-top: 10px;
+        }
+        .dot-pulse { width: 7px; height: 7px; background: var(--accent-mint); border-radius: 50%; box-shadow: 0 0 8px var(--accent-mint); }
+        .mini-map-preview {
+            background: linear-gradient(rgba(16,21,29,0.7), rgba(16,21,29,0.9)), url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=80') center/cover;
+            height: 110px; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border-color);
+        }
+
+        /* Quick Actions Bar */
+        .quick-actions { display: flex; justify-content: space-between; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .q-action { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 10px; min-width: 70px; text-align: center; cursor: pointer; flex: 1; transition: border-color 0.2s; }
+        .q-action:hover { border-color: var(--accent-mint); }
+        .q-action svg { width: 20px; height: 20px; fill: var(--accent-mint); margin-bottom: 6px; }
+        .q-action span { font-size: 10px; color: var(--text-secondary); display: block; font-weight: 500; }
+
+        /* Stories Row */
+        .stories-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
+        .stories-header span { color: var(--accent-mint); cursor: pointer; font-size: 11px; }
+        .stories-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; }
+        .story-item { text-align: center; cursor: pointer; min-width: 58px; }
+        .story-ring { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--accent-mint); padding: 2px; margin-bottom: 4px; }
+        .story-ring.add { border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; background: var(--bg-card); }
+        .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .story-item span { font-size: 10px; color: var(--text-secondary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58px; }
+
+        /* Dreamers Circle Banner Card */
+        .circle-banner {
+            background: linear-gradient(rgba(8,11,16,0.6), rgba(8,11,16,0.9)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80') center/cover;
+            border-radius: 16px; border: 1px solid var(--border-color); padding: 20px; position: relative;
+        }
+        .circle-banner h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--text-main); }
+        .circle-banner p { font-size: 12px; color: var(--text-secondary); margin-bottom: 15px; }
+        .btn-view-circle { background: var(--accent-mint); color: var(--bg-main); border: none; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+        /* Track AI Box */
+        .ai-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; }
+        .ai-input-wrap { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px; margin-top: 10px; }
+        .ai-input-wrap input { background: none; border: none; margin: 0; font-size: 13px; color: var(--text-main); }
+        .ai-send-btn { width: 28px; height: 28px; background: var(--accent-mint); border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .ai-send-btn svg { width: 14px; height: 14px; fill: var(--bg-main); }
+
+        /* Recent Activity Feed */
+        .activity-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
+        .activity-left { display: flex; align-items: center; gap: 10px; }
+        .activity-left img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .activity-left h4 { font-size: 12px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 5px; }
+        .activity-left p { font-size: 11px; color: var(--text-secondary); }
+
+        /* --- BOTTOM NAVIGATION BAR (Screenshot 1 Style) --- */
         .nav-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
             background: var(--bg-card); border-top: 1px solid var(--border-color);
             display: flex; justify-content: space-around; align-items: center; z-index: 100;
             padding-bottom: env(safe-area-inset-bottom);
         }
-        .nav-item { background: none; border: none; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.2s; }
+        .nav-item { background: none; border: none; color: var(--text-secondary); font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: var(--accent-mint); }
         .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
         .nav-map-btn {
@@ -122,83 +161,110 @@
             display: flex; align-items: center; justify-content: center; color: var(--bg-main);
             box-shadow: 0 4px 15px rgba(25,230,160,0.4); margin-top: -15px; cursor: pointer; border: none;
         }
+
+        /* Utility view area container */
+        .view-container { display: flex; flex-direction: column; gap: 15px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. CINEMATIC SPLASH SCREEN -->
-    <div id="splash-screen">
-        <div class="splash-glow"></div>
-        <div class="splash-content">
-            <div class="splash-logo">TRACK CIRCLE</div>
-            <div class="splash-tagline">Stay Connected. Stay Close.</div>
-        </div>
-    </div>
-
-    <!-- 2. AUTHENTICATION & ONBOARDING SCREEN -->
+    <!-- 1. CINEMATIC ONBOARDING & AUTHENTICATION SCREEN -->
     <div id="auth-container">
-        <div class="card">
-            <h2 id="form-title">Welcome Back</h2>
-            <div class="card-sub">Secure real-time location & social network</div>
+        <div class="onboard-header">
+            <div class="logo-circle">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            </div>
+            <div class="onboard-title">TRACK <span>CIRCLE</span></div>
+            <div class="onboard-tagline">Stay Connected. Stay Close.</div>
 
-            <input type="email" id="email" placeholder="Email Address" />
-            <input type="password" id="password" placeholder="Password" />
-            
-            <button class="primary-btn" id="action-btn" onclick="handleAuth()">Sign In</button>
+            <div class="feature-pills">
+                <div class="feature-pill">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                    Real-Time GPS
+                </div>
+                <div class="feature-pill">
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                    Group & DMs
+                </div>
+                <div class="feature-pill">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/></svg>
+                    Active Circles
+                </div>
+            </div>
+        </div>
 
-            <div class="switch" id="bottom-switch">
-                Don't have an account? <span onclick="toggleMode()">Create Account</span>
+        <div class="auth-card">
+            <!-- Initial Buttons View -->
+            <div id="auth-buttons-view">
+                <button class="pill-btn btn-mint" onclick="showEmailForm('signin')">Sign In &rarr;</button>
+                <button class="pill-btn btn-outline" onclick="showEmailForm('signup')">Create Account</button>
+                <div class="auth-separator">or</div>
+                <button class="pill-btn btn-outline" style="display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="socialLogin('google')">
+                    <img src="https://authjs.dev/img/providers/google.svg" style="width: 18px; height: 18px;"> Continue with Google
+                </button>
             </div>
 
-            <div id="message"></div>
+            <!-- Email Form Input View -->
+            <div id="auth-form-view">
+                <h3 id="form-heading" style="margin-bottom: 12px; font-size: 18px; color: var(--accent-mint);">Sign In</h3>
+                <input type="email" id="email" placeholder="Email Address" />
+                <input type="password" id="password" placeholder="Password" />
+                <button class="pill-btn btn-mint" id="action-btn" onclick="handleAuthSubmit()">Continue</button>
+                <button class="pill-btn btn-outline" style="margin-top: 5px;" onclick="resetAuthView()">Back</button>
+                <div id="message" style="text-align: center; font-size: 12px; margin-top: 10px;"></div>
+            </div>
         </div>
     </div>
 
-    <!-- 3. MAIN APPLICATION DASHBOARD -->
+    <!-- 2. MAIN APPLICATION DASHBOARD (Screenshot 1 Match) -->
     <div id="app-dashboard">
         <div class="app-header">
-            <div class="header-brand">
-                <h1>TRACK CIRCLE</h1>
+            <div class="header-left">
+                <img class="header-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                <div class="header-titles">
+                    <h1>TRACK CIRCLE <span>Beta</span></h1>
+                    <p id="time-greeting">Good Morning, Ezekiel ☀️</p>
+                </div>
             </div>
-            <div>
-                <span class="user-greeting" id="user-email-display">Connected</span>
+            <div class="header-actions">
+                <div class="icon-btn" onclick="switchTab('search')">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                </div>
+                <div class="icon-btn" onclick="switchTab('more')">
+                    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    <div class="notification-badge"></div>
+                </div>
             </div>
         </div>
 
-        <!-- MAIN VIEW CONTAINER -->
+        <!-- MAIN SCROLLABLE DASHBOARD VIEW -->
         <div class="app-content" id="main-view-area">
-            <!-- Default Home / Track View -->
-            <div class="section-title">Live Circle Radar</div>
-            <div class="gps-card">
-                <p style="color: var(--text-secondary); font-size: 13px;">GPS Location Sharing Status</p>
-                <div class="gps-status" id="location-status">Acquiring satellite lock & GPS coordinates...</div>
-                <button class="primary-btn" style="max-width: 200px; margin: 10px auto 0;" onclick="shareLocation()">Update GPS Position</button>
-            </div>
+            <!-- Dynamic Content loaded here -->
         </div>
 
-        <!-- BOTTOM NAVIGATION BAR (6 Destinations) -->
+        <!-- BOTTOM NAVIGATION BAR -->
         <div class="nav-bar">
             <button class="nav-item active" onclick="switchTab('track', this)">
                 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                 Track
             </button>
             <button class="nav-item" onclick="switchTab('circles', this)">
-                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/></svg>
                 Circles
             </button>
-            <button class="nav-map-btn" onclick="switchTab('map', this)" title="Live Map">
-                <svg viewBox="0 0 24 24" style="width: 26px; height: 26px; fill: #080B10;"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.1V5l6 2.1V19z"/></svg>
+            <button class="nav-map-btn" onclick="switchTab('map', this)">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #080B10;"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.1V5l6 2.1V19z"/></svg>
             </button>
             <button class="nav-item" onclick="switchTab('messages', this)">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                 Messages
             </button>
             <button class="nav-item" onclick="switchTab('profile', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>
                 Profile
             </button>
             <button class="nav-item" onclick="switchTab('more', this)">
-                <svg viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                 More
             </button>
         </div>
@@ -209,34 +275,30 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aGhkd2FxcWhxaW94dmZoamx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MjIwMzQsImV4cCI6MjEwNzQ5ODAzNH0.lJyrG_lKfBW0G3o2cgkm_AiBqw19e9Go8c3TW-BPm20';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- SPLASH & SESSION RESTORATION ---
-        window.addEventListener('load', async () => {
-            setTimeout(async () => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
+        let activeAuthMode = 'signin';
 
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session) {
-                    enterApp(session.user);
-                } else {
-                    document.getElementById('auth-container').style.display = 'flex';
-                }
-            }, 2000);
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                enterApp(session.user);
+            }
         });
 
-        let isLoginMode = true;
-        function toggleMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('form-title').innerText = isLoginMode ? 'Welcome Back' : 'Create Account';
-            document.getElementById('action-btn').innerText = isLoginMode ? 'Sign In' : 'Sign Up';
-            document.getElementById('bottom-switch').innerHTML = isLoginMode ? 
-                'Don\'t have an account? <span onclick="toggleMode()">Create Account</span>' : 
-                'Already have an account? <span onclick="toggleMode()">Sign In</span>';
+        function showEmailForm(mode) {
+            activeAuthMode = mode;
+            document.getElementById('auth-buttons-view').style.display = 'none';
+            document.getElementById('auth-form-view').style.display = 'block';
+            document.getElementById('form-heading').innerText = mode === 'signin' ? 'Sign In to Account' : 'Create New Account';
+            document.getElementById('action-btn').innerText = mode === 'signin' ? 'Sign In' : 'Sign Up';
+        }
+
+        function resetAuthView() {
+            document.getElementById('auth-buttons-view').style.display = 'block';
+            document.getElementById('auth-form-view').style.display = 'none';
             document.getElementById('message').innerText = '';
         }
 
-        async function handleAuth() {
+        async function handleAuthSubmit() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const msgEl = document.getElementById('message');
@@ -248,9 +310,9 @@
             }
 
             msgEl.style.color = 'var(--accent-mint)';
-            msgEl.innerText = 'Authenticating securely...';
+            msgEl.innerText = 'Connecting...';
 
-            if (isLoginMode) {
+            if (activeAuthMode === 'signin') {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) {
                     msgEl.style.color = 'var(--danger)';
@@ -265,176 +327,270 @@
                     msgEl.innerText = error.message;
                 } else {
                     msgEl.style.color = 'var(--accent-mint)';
-                    msgEl.innerText = 'Registration successful! Entering Track Circle...';
+                    msgEl.innerText = 'Account created successfully!';
                     if (data.user) enterApp(data.user);
                 }
             }
         }
 
+        async function socialLogin(provider) {
+            await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
+        }
+
         function enterApp(user) {
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-dashboard').style.display = 'flex';
-            document.getElementById('user-email-display').innerText = user.email;
-            shareLocation();
+            switchTab('track');
+            updateGPSBackground();
         }
 
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            location.reload();
-        }
-
-        // --- REAL GPS & LOCATION SYNC ---
-        function shareLocation() {
-            const statusEl = document.getElementById('location-status');
-            if (!navigator.geolocation) {
-                statusEl.innerText = 'Geolocation is not supported by your browser.';
-                return;
+        function updateGPSBackground() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    if (user) {
+                        await supabaseClient.from('user_locations').upsert({
+                            user_id: user.id,
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude,
+                            updated_at: new Date()
+                        }, { onConflict: 'user_id' });
+                    }
+                });
             }
-            statusEl.innerText = 'Obtaining precise GPS fix...';
-            
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) return;
-
-                const { error } = await supabaseClient
-                    .from('user_locations')
-                    .upsert({ user_id: user.id, latitude: lat, longitude: lon, updated_at: new Date() }, { onConflict: 'user_id' });
-
-                if (!error) {
-                    statusEl.style.color = 'var(--accent-mint)';
-                    statusEl.innerText = `Active & Broadcasting • Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-                } else {
-                    statusEl.style.color = 'var(--text-secondary)';
-                    statusEl.innerText = `GPS Fixed • Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-                }
-            }, () => {
-                statusEl.style.color = 'var(--danger)';
-                statusEl.innerText = 'Location permission denied. Enable GPS in browser settings.';
-            }, { enableHighAccuracy: true });
         }
 
-        // --- NAVIGATION & VIEWS ---
+        // --- RENDER DASHBOARD TABS ---
         function switchTab(tab, el) {
-            document.querySelectorAll('.nav-item, .nav-map-btn').forEach(item => item.classList.remove('active'));
-            if (el) el.classList.add('active');
+            if (el) {
+                document.querySelectorAll('.nav-item, .nav-map-btn').forEach(item => item.classList.remove('active'));
+                el.classList.add('active');
+            }
             const viewEl = document.getElementById('main-view-area');
 
             if (tab === 'track') {
                 viewEl.innerHTML = `
-                    <div class="section-title">Live Circle Radar</div>
-                    <div class="gps-card">
-                        <p style="color: var(--text-secondary); font-size: 13px;">GPS Location Sharing Status</p>
-                        <div class="gps-status" id="location-status">Broadcasting live coordinates...</div>
-                        <button class="primary-btn" style="max-width: 200px; margin: 10px auto 0;" onclick="shareLocation()">Update GPS Position</button>
+                    <!-- Top Grid: Sharing Status & Live Map Preview -->
+                    <div class="top-grid">
+                        <div class="dash-card">
+                            <p style="font-size: 11px; color: var(--text-secondary);">Location Status</p>
+                            <h3 style="font-size: 14px; margin-top: 4px;">Sharing Live</h3>
+                            <div class="sharing-pill">
+                                <div class="dot-pulse"></div> Active - 4 members
+                            </div>
+                        </div>
+                        <div class="mini-map-preview" onclick="switchTab('map')">
+                            <div style="font-size: 10px; font-weight: 700; color: var(--accent-mint); display: flex; align-items: center; gap: 4px;">
+                                <div class="dot-pulse"></div> Live Location
+                            </div>
+                            <span style="font-size: 10px; color: var(--text-secondary);">Tap to expand map</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <div class="q-action" onclick="updateGPSBackground()">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                            <span>Share Loc</span>
+                        </div>
+                        <div class="q-action" onclick="switchTab('messages')">
+                            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                            <span>New DM</span>
+                        </div>
+                        <div class="q-action" onclick="alert('Circle creation flow')">
+                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3z"/></svg>
+                            <span>New Circle</span>
+                        </div>
+                        <div class="q-action" onclick="alert('Media upload')">
+                            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                            <span>Upload</span>
+                        </div>
+                        <div class="q-action" onclick="switchTab('more')">
+                            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 14h-2v-2h2zm0-4h-2V7h2z"/></svg>
+                            <span>Track AI</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Access Stories -->
+                    <div class="view-container">
+                        <div class="stories-header">
+                            Quick Access <span onclick="alert('All stories')">View All &gt;</span>
+                        </div>
+                        <div class="stories-row">
+                            <div class="story-item" onclick="alert('Add story')">
+                                <div class="story-ring add">＋</div>
+                                <span>Add Story</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"></div>
+                                <span>My Story</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"></div>
+                                <span>Godspower</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80"></div>
+                                <span>Precious</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"></div>
+                                <span>Tobi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Dreamers Circle Card -->
+                    <div class="circle-banner">
+                        <p style="font-size: 10px; color: var(--accent-mint); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">You're part of</p>
+                        <h3>The Dreamers Circle</h3>
+                        <p>12 active members • 3.4 km away</p>
+                        <button class="btn-view-circle" onclick="switchTab('circles')">View Circle &rarr;</button>
+                    </div>
+
+                    <!-- Track AI Compact Box -->
+                    <div class="ai-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: var(--accent-mint);"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> Track AI <span style="font-size: 9px; background: rgba(25,230,160,0.1); color: var(--accent-mint); padding: 2px 5px; border-radius: 4px;">Beta</span>
+                            </h4>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin: 4px 0 10px;">Ask anything... • Plan weekend trip, study tips</p>
+                        <div class="ai-input-wrap">
+                            <input type="text" id="ai-prompt" placeholder="Type a message..." />
+                            <button class="ai-send-btn" onclick="sendAiPrompt()">
+                                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div>
+                        <div class="stories-header" style="margin-bottom: 10px;">
+                            Recent Activity <span onclick="alert('View all activity')">View All &gt;</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-left">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80">
+                                <div>
+                                    <h4>Tobi <span class="dot-pulse"></span></h4>
+                                    <p>Shared a location • 12m ago</p>
+                                </div>
+                            </div>
+                            <span style="font-size: 11px; color: var(--accent-mint);">2.4 km</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-left">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80">
+                                <div>
+                                    <h4>Precious <span class="dot-pulse"></span></h4>
+                                    <p>Sent a photo • 18m ago</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
-                shareLocation();
             } else if (tab === 'circles') {
                 viewEl.innerHTML = `
-                    <div class="section-title">Your Circles</div>
-                    <div class="gps-card" style="text-align: left;">
-                        <h3 style="color: var(--accent-mint); margin-bottom: 8px;">Family & Close Friends</h3>
-                        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">3 active members sharing location.</p>
-                        <button class="primary-btn" style="font-size: 14px; padding: 10px;">+ Create New Circle</button>
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">Circle Management</div>
+                    <div class="dash-card">
+                        <h3 style="color: var(--accent-mint); margin-bottom: 6px;">The Dreamers Circle</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 15px;">Active group tracking session enabled.</p>
+                        <button class="btn-view-circle" onclick="alert('Invite code: TRK-9928')">Generate Invite Code</button>
                     </div>
                 `;
             } else if (tab === 'map') {
                 viewEl.innerHTML = `
-                    <div class="section-title">Live Interactive Map</div>
-                    <div class="gps-card" style="height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0d131c;">
-                        <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; fill: var(--accent-mint); margin-bottom: 15px;"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.1V5l6 2.1V19z"/></svg>
-                        <p style="color: var(--text-main); font-weight: 600; margin-bottom: 5px;">Map Engine Active</p>
-                        <p style="color: var(--text-secondary); font-size: 12px; max-width: 260px;">Displaying authorized circle members and your live GPS marker.</p>
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">Live GPS Radar Map</div>
+                    <div class="dash-card" style="height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div style="background: rgba(8,11,16,0.85); padding: 20px; border-radius: 16px; text-align: center; border: 1px solid var(--border-color);">
+                            <div class="dot-pulse" style="margin: 0 auto 10px; width: 12px; height: 12px;"></div>
+                            <h4 style="color: var(--text-main); margin-bottom: 4px;">Satellite Lock Active</h4>
+                            <p style="font-size: 11px; color: var(--text-secondary);">Broadcasting coordinates to Supabase database.</p>
+                        </div>
                     </div>
                 `;
             } else if (tab === 'messages') {
                 viewEl.innerHTML = `
-                    <div class="section-title">Messages & Direct Chats</div>
-                    <div class="chat-box">
-                        <div class="messages-list" id="msg-list">Loading secure message history...</div>
-                        <div class="chat-input-area">
-                            <input type="text" id="chat-input" placeholder="Type a secure message..." />
-                            <button onclick="sendMessage()">Send</button>
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">Direct Messages & Groups</div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; height: 450px; display: flex; flex-direction: column; overflow: hidden;">
+                        <div id="msg-list" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">Loading messages...</div>
+                        <div style="display: flex; padding: 10px; background: var(--bg-main); border-top: 1px solid var(--border-color); gap: 8px;">
+                            <input type="text" id="chat-input" placeholder="Type a message..." style="margin:0;" />
+                            <button onclick="sendChatMessage()" style="background: var(--accent-mint); border: none; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer;">Send</button>
                         </div>
                     </div>
                 `;
                 fetchMessages();
             } else if (tab === 'profile') {
                 viewEl.innerHTML = `
-                    <div class="section-title">Account Profile</div>
-                    <div class="profile-card">
-                        <div class="avatar-circle">TC</div>
-                        <h3 id="prof-email" style="margin-bottom: 5px;">User Profile</h3>
-                        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">Track Circle Member</p>
-                        <button class="primary-btn" style="background: var(--danger); color: #fff; margin-bottom: 10px;" onclick="logout()">Sign Out of Account</button>
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">Account Settings</div>
+                    <div class="dash-card" style="text-align: center; padding: 30px;">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--accent-mint); margin: 0 auto 15px; object-fit: cover;">
+                        <h3 id="profile-email-lbl" style="margin-bottom: 5px;">User Profile</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 25px;">Track Circle Pro Member</p>
+                        <button class="pill-btn" style="background: var(--danger); color: #fff;" onclick="logout()">Sign Out</button>
                     </div>
                 `;
                 supabaseClient.auth.getUser().then(({data}) => {
-                    if (data.user) document.getElementById('prof-email').innerText = data.user.email;
+                    if (data.user) document.getElementById('profile-email-lbl').innerText = data.user.email;
                 });
             } else if (tab === 'more') {
                 viewEl.innerHTML = `
-                    <div class="section-title">More Settings & Safety</div>
-                    <div class="gps-card" style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
-                        <p style="color: var(--text-main); font-weight: 600; cursor: pointer;">🔒 Privacy & Location Sharing Controls</p>
-                        <p style="color: var(--text-main); font-weight: 600; cursor: pointer;">📜 Terms of Service & Privacy Policy</p>
-                        <p style="color: var(--text-main); font-weight: 600; cursor: pointer;">🤖 Track AI Assistant Settings</p>
-                        <p style="color: var(--danger); font-weight: 600; cursor: pointer;">⚠️ Delete Account & Data Export</p>
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">More & Safety</div>
+                    <div class="dash-card" style="display: flex; flex-direction: column; gap: 12px;">
+                        <p style="font-weight: 600; cursor: pointer;">🔒 Privacy & Location Sharing Settings</p>
+                        <p style="font-weight: 600; cursor: pointer;">📜 Terms of Service & Privacy Policy</p>
+                        <p style="font-weight: 600; cursor: pointer;">🤖 Track AI Preferences</p>
+                        <p style="font-weight: 600; color: var(--danger); cursor: pointer;">⚠️ Delete Account</p>
                     </div>
                 `;
             }
         }
 
-        // --- REALTIME MESSAGING LOGIC ---
         async function fetchMessages() {
-            const { data, error } = await supabaseClient
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: true })
-                .limit(50);
-
-            const listEl = document.getElementById('msg-list');
-            if (!listEl) return;
-
-            if (error) {
-                listEl.innerHTML = `<p style="color: var(--danger);">Error loading messages: ${error.message}</p>`;
+            const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
+            const list = document.getElementById('msg-list');
+            if (!list) return;
+            list.innerHTML = '';
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-secondary); text-align:center;">No messages yet.</p>';
                 return;
             }
-
-            listEl.innerHTML = '';
-            if (data.length === 0) {
-                listEl.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin-top: 20px;">No messages yet. Start the conversation!</p>`;
-                return;
-            }
-
-            data.forEach(msg => {
+            data.forEach(m => {
                 const div = document.createElement('div');
-                div.className = 'message-item';
-                div.innerHTML = `<span>${msg.sender_email}</span>${msg.content}`;
-                listEl.appendChild(div);
+                div.style.background = '#182232';
+                div.style.padding = '10px 14px';
+                div.style.borderRadius = '10px';
+                div.style.fontSize = '13px';
+                div.innerHTML = `<span style="color:var(--accent-mint); font-size:10px; display:block; font-weight:700;">${m.sender_email}</span>${m.content}`;
+                list.appendChild(div);
             });
-            listEl.scrollTop = listEl.scrollHeight;
+            list.scrollTop = list.scrollHeight;
         }
 
-        async function sendMessage() {
-            const inputEl = document.getElementById('chat-input');
-            const text = inputEl.value.trim();
-            if (!text) return;
-
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if (!val) return;
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
+            await supabaseClient.from('messages').insert({ sender_email: user.email, content: val });
+            input.value = '';
+            fetchMessages();
+        }
 
-            const { error } = await supabaseClient.from('messages').insert({
-                sender_email: user.email,
-                content: text
-            });
-
-            if (!error) {
-                inputEl.value = '';
-                fetchMessages();
+        function sendAiPrompt() {
+            const prompt = document.getElementById('ai-prompt').value;
+            if (prompt) {
+                alert('Track AI Query Received: "' + prompt + '". Connecting to Gemini API endpoint...');
+                document.getElementById('ai-prompt').value = '';
             }
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
         }
     </script>
 </body>
