@@ -138,6 +138,9 @@
         /* Comments Drawer Modal */
         .comments-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 60vh; background: var(--bg-card); border-top: 1px solid var(--border-color); border-radius: 24px 24px 0 0; z-index: 2000; display: none; flex-direction: column; padding: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.8); }
 
+        /* Legal Modal */
+        .legal-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(8,11,16,0.92); z-index: 3000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+
         /* Track AI Box Styles */
         .ai-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; margin-top: 15px; }
         .ai-input-wrap { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px 12px; margin-top: 10px; gap: 8px; }
@@ -276,6 +279,27 @@
         </div>
     </div>
 
+    <!-- LEGAL COMPLIANCE MODAL -->
+    <div class="legal-modal" id="legal-modal">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 18px; color: var(--accent-mint);">Track Circle Legal & Compliance</h2>
+            <button onclick="closeLegal()" style="background:none; border:none; color:var(--text-main); font-size:22px; cursor:pointer;">&times;</button>
+        </div>
+        <div style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 16px;">
+            <h3 style="color: var(--text-main); font-size: 15px;">1. Terms and Conditions</h3>
+            <p>Welcome to Track Circle. By using our platform, you agree to comply with and be bound by these terms regarding live location sharing, messaging, and creator content.</p>
+            
+            <h3 style="color: var(--text-main); font-size: 15px;">2. Privacy Policy & Location Sharing</h3>
+            <p>We prioritize user privacy. Location data is shared exclusively with members within your authorized circles or active town/neighborhood radar nodes. You control when your location is broadcast.</p>
+
+            <h3 style="color: var(--text-main); font-size: 15px;">3. Virtual Gifts & Monetization</h3>
+            <p>Virtual gifts sent across the platform are subject to an 80/20 revenue split (80% credited to the recipient creator, 20% retained by Track Circle for platform maintenance and processing).</p>
+
+            <h3 style="color: var(--text-main); font-size: 15px;">4. Community Guidelines</h3>
+            <p>Harassment, unauthorized tracking, hate speech, or misuse of broadcast features will result in immediate suspension and account termination.</p>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://kthhdwaqqhqioxvfhjlx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aGhkd2FxcWhxaW94dmZoamx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MjIwMzQsImV4cCI6MjEwNzQ5ODAzNH0.lJyrG_lKfBW0G3o2cgkm_AiBqw19e9Go8c3TW-BPm20';
@@ -386,6 +410,10 @@
             await supabaseClient.auth.signOut();
             location.reload();
         }
+
+        // --- LEGAL MODAL CONTROLS ---
+        function openLegal() { document.getElementById('legal-modal').style.display = 'flex'; }
+        function closeLegal() { document.getElementById('legal-modal').style.display = 'none'; }
 
         // --- REALTIME CHAT FUNCTIONS ---
         async function loadChatMessages() {
@@ -544,7 +572,7 @@
                 item.style.padding = '12px 16px';
                 item.style.borderRadius = '12px';
                 item.style.display = 'flex';
-                item.style.justify0content = 'space-between';
+                item.style.justifyContent = 'space-between';
                 item.style.alignItems = 'center';
                 item.style.border = '1px solid var(--border-color)';
                 item.innerHTML = `
@@ -706,6 +734,8 @@
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--accent-mint); margin: 0 auto 14px; object-fit: cover;">
                         <h3 id="profile-email-display" style="font-size: 15px; margin-bottom: 4px; color: var(--text-main);">Account Settings</h3>
                         <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Track Circle Pro Member</p>
+                        
+                        <button class="pill-btn btn-outline" style="max-width: 220px; margin: 0 auto 10px auto; padding: 12px;" onclick="openLegal()">📜 Legal & Policies</button>
                         <button class="pill-btn" style="background: var(--danger); color: #fff; max-width: 220px; margin: 0 auto; padding: 12px;" onclick="logoutUser()">Sign Out</button>
                     </div>
                 `;
