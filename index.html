@@ -125,6 +125,14 @@
         .chat-input-area input { margin: 0; flex: 1; padding: 12px; }
         .chat-input-area button { width: 80px; margin: 0; background: var(--accent-mint); border: none; border-radius: 10px; color: var(--bg-main); font-weight: 800; cursor: pointer; }
 
+        /* Track Video Feed Styles */
+        .video-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 16px; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; background-size: cover; background-position: center; }
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(8,11,16,0.95), rgba(8,11,16,0.2) 60%); z-index: 1; }
+        .video-content { position: relative; z-index: 2; }
+        .video-actions { position: absolute; right: 15px; bottom: 80px; display: flex; flex-direction: column; gap: 14px; z-index: 3; align-items: center; }
+        .action-icon-btn { width: 42px; height: 42px; background: rgba(16,21,29,0.85); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; }
+        .action-icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
         /* Modal Overlay */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -441,6 +449,48 @@
             });
         }
 
+        // --- TRACK IT VIDEO FEED ---
+        async function loadTrackFeed() {
+            const feedEl = document.getElementById('track-feed-list');
+            if (!feedEl) return;
+
+            const { data, error } = await supabaseClient.from('videos').select('*').order('created_at', { ascending: false });
+            if (error || !data || data.length === 0) {
+                // Fallback demo posts if table is empty
+                feedEl.innerHTML = `
+                    <div class="video-card" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80')">
+                        <div class="video-overlay"></div>
+                        <div class="video-content">
+                            <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 4px;">@godspower_dev</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary);">Building the future of social apps on mobile! 🚀 #TrackCircle</p>
+                        </div>
+                        <div class="video-actions">
+                            <div class="action-icon-btn" onclick="alert('Liked post!')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            feedEl.innerHTML = '';
+            data.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.style.backgroundImage = `url('${v.video_url}')`;
+                card.innerHTML = `
+                    <div class="video-overlay"></div>
+                    <div class="video-content">
+                        <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 4px;">@${v.creator_email.split('@')[0]}</h4>
+                        <p style="font-size: 12px; color: var(--text-secondary);">${v.caption || ''}</p>
+                    </div>
+                    <div class="video-actions">
+                        <div class="action-icon-btn" onclick="alert('Liked post!')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                    </div>
+                `;
+                feedEl.appendChild(card);
+            });
+        }
+
         function switchTab(tab, el) {
             if (el) {
                 document.querySelectorAll('.nav-item, .nav-map-btn').forEach(item => item.classList.remove('active'));
@@ -512,9 +562,10 @@
                 });
             } else if (tab === 'track') {
                 viewEl.innerHTML = `
-                    <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">Track Feed</h2>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Short videos and social tracking feed.</p>
+                    <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">✨ Track Video Feed</h2>
+                    <div id="track-feed-list">Loading video feed...</div>
                 `;
+                loadTrackFeed();
             }
         }
     </script>
