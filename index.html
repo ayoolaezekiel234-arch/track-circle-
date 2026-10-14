@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Circle - Stay Connected. Stay Close.</title>
-    <!-- Supabase SDK -->
+    <!-- Supabase CDN SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -19,38 +19,57 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
+        /* --- CINEMATIC SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: linear-gradient(135deg, #050b14 0%, var(--bg-main) 50%, #11221b 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .splash-glow {
+            position: absolute; width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(25,230,160,0.2) 0%, rgba(8,11,16,0) 70%);
+            border-radius: 50%; animation: pulseGlow 3s infinite alternate;
+        }
+        @keyframes pulseGlow { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.3); opacity: 1; } }
+        .splash-content { position: relative; text-align: center; z-index: 2; }
+        .splash-logo {
+            font-size: 38px; font-weight: 900; letter-spacing: 1px;
+            background: linear-gradient(90deg, #F7FAF9, var(--accent-mint));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
+        }
+        .splash-tagline { font-size: 13px; color: var(--text-secondary); letter-spacing: 4px; text-transform: uppercase; }
+
         /* --- LANDING & AUTH SCREEN --- */
         #auth-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background: linear-gradient(rgba(8,11,16,0.82), rgba(8,11,16,0.96)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80') no-repeat center center/cover;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
-            padding: 30px;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: linear-gradient(rgba(8,11,16,0.85), rgba(8,11,16,0.96)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80') no-repeat center center/cover;
+            justify-content: center; align-items: center; z-index: 999; padding: 24px;
         }
         .auth-wrapper {
             width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; text-align: center;
         }
         .logo-circle {
-            width: 76px; height: 76px; border: 3px solid var(--accent-mint); border-radius: 50%;
-            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 35px rgba(25,230,160,0.35); background: rgba(8,11,16,0.8);
+            width: 72px; height: 72px; border: 3px solid var(--accent-mint); border-radius: 50%;
+            margin-bottom: 16px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(25,230,160,0.35); background: rgba(8,11,16,0.8);
         }
-        .logo-circle svg { width: 38px; height: 38px; fill: var(--accent-mint); }
-        .brand-title { font-size: 32px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); margin-bottom: 6px; }
+        .logo-circle svg { width: 36px; height: 36px; fill: var(--accent-mint); }
+        .brand-title { font-size: 30px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); margin-bottom: 4px; }
         .brand-title span { color: var(--accent-mint); }
-        .brand-tagline { font-size: 12px; color: var(--text-secondary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
+        .brand-tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
 
         .auth-box {
-            background: var(--bg-card); padding: 28px 22px; border-radius: 24px;
+            background: var(--bg-card); padding: 26px 20px; border-radius: 22px;
             width: 100%; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
         .pill-btn {
-            width: 100%; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 700;
+            width: 100%; padding: 14px; border-radius: 30px; font-size: 15px; font-weight: 700;
             cursor: pointer; text-align: center; border: none; margin-bottom: 12px; transition: opacity 0.2s;
         }
         .btn-mint { background: var(--accent-mint); color: var(--bg-main); box-shadow: 0 4px 20px rgba(25,230,160,0.3); }
         .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
         
-        /* Form View Container inside Auth Box */
         #auth-form-view { display: none; text-align: left; }
         .form-heading { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; text-align: center; }
         .form-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; text-align: center; }
@@ -62,110 +81,20 @@
             color: var(--text-main); font-size: 15px;
         }
         input:focus { outline: none; border-color: var(--accent-mint); }
-
-        /* --- MAIN APP DASHBOARD --- */
-        #app-dashboard {
-            display: none; width: 100%; height: 100vh;
-            flex-direction: column; background: var(--bg-main); position: relative; overflow: hidden;
-        }
-        .app-header {
-            padding: 16px 20px; background: var(--bg-main); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; z-index: 10;
-        }
-        .header-left { display: flex; align-items: center; gap: 14px; }
-        .header-avatar { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--accent-mint); object-fit: cover; }
-        .header-titles h1 { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-        .header-titles h1 span { color: var(--accent-mint); font-size: 10px; font-weight: 600; background: rgba(25,230,160,0.1); padding: 2px 6px; border-radius: 6px; }
-        .header-titles p { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        .header-actions { display: flex; gap: 10px; }
-        .icon-btn {
-            width: 38px; height: 38px; background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
-            position: relative;
-        }
-        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
-        .notification-badge { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; }
-
-        .app-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 100px; }
-
-        .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .dash-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; position: relative; }
-        .sharing-pill {
-            display: inline-flex; align-items: center; gap: 6px; background: rgba(25,230,160,0.1);
-            border: 1px solid rgba(25,230,160,0.3); padding: 6px 12px; border-radius: 20px; font-size: 11px; color: var(--accent-mint); font-weight: 600; margin-top: 10px;
-        }
-        .dot-pulse { width: 7px; height: 7px; background: var(--accent-mint); border-radius: 50%; box-shadow: 0 0 8px var(--accent-mint); }
-        .mini-map-preview {
-            background: linear-gradient(rgba(16,21,29,0.7), rgba(16,21,29,0.9)), url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=400&q=80') center/cover;
-            height: 120px; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border-color); cursor: pointer;
-        }
-
-        .quick-actions { display: flex; justify-content: space-between; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
-        .q-action { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 10px; min-width: 72px; text-align: center; cursor: pointer; flex: 1; transition: border-color 0.2s; }
-        .q-action:hover { border-color: var(--accent-mint); }
-        .q-action svg { width: 22px; height: 22px; fill: var(--accent-mint); margin-bottom: 6px; }
-        .q-action span { font-size: 10px; color: var(--text-secondary); display: block; font-weight: 500; }
-
-        .stories-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-        .stories-header span { color: var(--accent-mint); cursor: pointer; font-size: 11px; }
-        .stories-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; }
-        .story-item { text-align: center; cursor: pointer; min-width: 60px; }
-        .story-ring { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--accent-mint); padding: 2px; margin-bottom: 6px; }
-        .story-ring.add { border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; background: var(--bg-card); color: var(--text-secondary); font-size: 20px; }
-        .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .story-item span { font-size: 10px; color: var(--text-secondary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60px; }
-
-        .circle-banner {
-            background: linear-gradient(rgba(8,11,16,0.6), rgba(8,11,16,0.9)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80') center/cover;
-            border-radius: 18px; border: 1px solid var(--border-color); padding: 22px; position: relative;
-        }
-        .circle-banner h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--text-main); }
-        .circle-banner p { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; }
-        .btn-view-circle { background: var(--accent-mint); color: var(--bg-main); border: none; padding: 10px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
-
-        .ai-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; }
-        .ai-input-wrap { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 14px; padding: 10px 14px; margin-top: 12px; }
-        .ai-input-wrap input { background: none; border: none; margin: 0; font-size: 13px; color: var(--text-main); padding: 0; flex: 1; }
-        .ai-send-btn { width: 32px; height: 32px; background: var(--accent-mint); border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-        .ai-send-btn svg { width: 14px; height: 14px; fill: var(--bg-main); }
-
-        /* Spotlight Feed styles */
-        .spotlight-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 400px; margin: 0 auto; }
-        .spotlight-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; position: relative; }
-        .spotlight-video-mock { height: 420px; background: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80') center/cover; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; position: relative; }
-        .spotlight-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(8,11,16,0.9), transparent 60%); }
-        .spotlight-info { position: relative; z-index: 2; }
-        .spotlight-actions { position: absolute; right: 15px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; z-index: 3; align-items: center; }
-        .spotlight-action-btn { width: 42px; height: 42px; background: rgba(16,21,29,0.8); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; }
-        .spotlight-action-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
-        /* --- BOTTOM NAVIGATION BAR --- */
-        .nav-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
-            background: var(--bg-card); border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-around; align-items: center; z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-item { background: none; border: none; color: var(--text-secondary); font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-item.active { color: var(--accent-mint); }
-        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
-        .nav-map-btn {
-            background: var(--accent-mint); width: 48px; height: 48px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: var(--bg-main);
-            box-shadow: 0 4px 15px rgba(25,230,160,0.4); margin-top: -16px; cursor: pointer; border: none;
-        }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(8,11,16,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
-        }
-        .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 400px; padding: 24px; }
-        .view-container { display: flex; flex-direction: column; gap: 18px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. LANDING & AUTHENTICATION SCREEN -->
+    <!-- 1. CINEMATIC SPLASH -->
+    <div id="splash-screen">
+        <div class="splash-glow"></div>
+        <div class="splash-content">
+            <div class="splash-logo">TRACK CIRCLE</div>
+            <div class="splash-tagline">Stay Connected. Stay Close.</div>
+        </div>
+    </div>
+
+    <!-- 2. ONBOARDING & AUTHENTICATION -->
     <div id="auth-container">
         <div class="auth-wrapper">
             <div class="logo-circle">
@@ -179,10 +108,6 @@
                 <div id="auth-buttons-view">
                     <button class="pill-btn btn-mint" onclick="showEmailForm('signin')">Sign In &rarr;</button>
                     <button class="pill-btn btn-outline" onclick="showEmailForm('signup')">Create Account</button>
-                    <div style="font-size: 11px; color: var(--text-secondary); margin: 12px 0;">or</div>
-                    <button class="pill-btn btn-outline" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0;" onclick="socialLogin('google')">
-                        <img src="https://authjs.dev/img/providers/google.svg" style="width: 16px; height: 16px;"> Continue with Google
-                    </button>
                 </div>
 
                 <!-- Clean Email/Password Form View -->
@@ -207,70 +132,6 @@
         </div>
     </div>
 
-    <!-- 2. MAIN APP DASHBOARD -->
-    <div id="app-dashboard">
-        <div class="app-header">
-            <div class="header-left">
-                <img class="header-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar">
-                <div class="header-titles">
-                    <h1>TRACK CIRCLE <span>Beta</span></h1>
-                    <p id="time-greeting">Good Morning, Ezekiel ☀️</p>
-                </div>
-            </div>
-            <div class="header-actions">
-                <div class="icon-btn" onclick="switchTab('search')">
-                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                </div>
-                <div class="icon-btn" onclick="switchTab('more')">
-                    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-                    <div class="notification-badge"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="app-content" id="main-view-area"></div>
-
-        <!-- BOTTOM NAVIGATION BAR -->
-        <div class="nav-bar">
-            <button class="nav-item active" onclick="switchTab('track', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                Track
-            </button>
-            <button class="nav-item" onclick="switchTab('circles', this)">
-                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/></svg>
-                Circles
-            </button>
-            <button class="nav-map-btn" onclick="switchTab('map', this)">
-                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #080B10;"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.1V5l6 2.1V19z"/></svg>
-            </button>
-            <button class="nav-item" onclick="switchTab('messages', this)">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                Messages
-            </button>
-            <button class="nav-item" onclick="switchTab('profile', this)">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>
-                Profile
-            </button>
-            <button class="nav-item" onclick="switchTab('more', this)">
-                <svg viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                More
-            </button>
-        </div>
-    </div>
-
-    <!-- MODAL POPUP -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal-card">
-            <h3 style="color: var(--accent-mint); margin-bottom: 14px;" id="modal-title">Create New Circle</h3>
-            <div class="input-group">
-                <label>Circle Name</label>
-                <input type="text" id="modal-input-name" placeholder="e.g. Family Trip" />
-            </div>
-            <button class="pill-btn btn-mint" onclick="submitCircleCreation()" style="margin-top: 10px;">Save Circle</button>
-            <button class="pill-btn btn-outline" onclick="closeModal()">Cancel</button>
-        </div>
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://kthhdwaqqhqioxvfhjlx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aGhkd2FxcWhxaW94dmZoamx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MjIwMzQsImV4cCI6MjEwNzQ5ODAzNH0.lJyrG_lKfBW0G3o2cgkm_AiBqw19e9Go8c3TW-BPm20';
@@ -278,22 +139,14 @@
 
         let activeAuthMode = 'signin';
 
-        window.addEventListener('load', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                enterApp(session.user);
-            }
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+                document.getElementById('auth-container').style.display = 'flex';
+            }, 2000);
         });
-
-        function updateGreeting(userEmail) {
-            const hour = new Date().getHours();
-            let greeting = 'Good Morning ☀️';
-            if (hour >= 12 && hour < 17) greeting = 'Good Afternoon 🌤️';
-            else if (hour >= 17) greeting = 'Good Evening 🌙';
-            const username = userEmail ? userEmail.split('@')[0] : 'Ezekiel';
-            const formattedName = username.charAt(0).toUpperCase() + username.slice(1);
-            document.getElementById('time-greeting').innerText = `${greeting}, ${formattedName}`;
-        }
 
         function showEmailForm(mode) {
             activeAuthMode = mode;
@@ -325,276 +178,14 @@
             msgEl.innerText = 'Connecting to Supabase...';
 
             if (activeAuthMode === 'signin') {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) { msgEl.style.color = 'var(--danger)'; msgEl.innerText = error.message; }
-                else { enterApp(data.user); }
+                else { alert('Sign in successful!'); }
             } else {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                const { error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) { msgEl.style.color = 'var(--danger)'; msgEl.innerText = error.message; }
-                else { 
-                    msgEl.style.color = 'var(--accent-mint)'; 
-                    msgEl.innerText = 'Account created successfully!';
-                    if (data.user) enterApp(data.user);
-                }
+                else { alert('Account created successfully!'); }
             }
-        }
-
-        async function socialLogin(provider) {
-            await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
-        }
-
-        function enterApp(user) {
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-dashboard').style.display = 'flex';
-            updateGreeting(user.email);
-            switchTab('track');
-            updateGPSBackground();
-        }
-
-        function updateGPSBackground() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const { data: { user } } = await supabaseClient.auth.getUser();
-                    if (user) {
-                        await supabaseClient.from('user_locations').upsert({
-                            user_id: user.id,
-                            latitude: pos.coords.latitude,
-                            longitude: pos.coords.longitude,
-                            updated_at: new Date()
-                        }, { onConflict: 'user_id' });
-                    }
-                });
-            }
-        }
-
-        function openModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-        async function submitCircleCreation() {
-            const name = document.getElementById('modal-input-name').value.trim();
-            if (!name) return;
-            const { error } = await supabaseClient.from('groups').insert({ name });
-            if (!error) {
-                alert('Circle created successfully!');
-                closeModal();
-                switchTab('circles');
-            } else {
-                alert('Error: ' + error.message);
-            }
-        }
-
-        // --- DASHBOARD TABS ---
-        function switchTab(tab, el) {
-            if (el) {
-                document.querySelectorAll('.nav-item, .nav-map-btn').forEach(item => item.classList.remove('active'));
-                el.classList.add('active');
-            }
-            const viewEl = document.getElementById('main-view-area');
-
-            if (tab === 'track') {
-                viewEl.innerHTML = `
-                    <div class="top-grid">
-                        <div class="dash-card">
-                            <p style="font-size: 11px; color: var(--text-secondary);">Location Status</p>
-                            <h3 style="font-size: 14px; margin-top: 6px;">Sharing Live</h3>
-                            <div class="sharing-pill">
-                                <div class="dot-pulse"></div> Active - 4 members
-                            </div>
-                        </div>
-                        <div class="mini-map-preview" onclick="switchTab('map')">
-                            <div style="font-size: 10px; font-weight: 700; color: var(--accent-mint); display: flex; align-items: center; gap: 4px;">
-                                <div class="dot-pulse"></div> Live Location
-                            </div>
-                            <span style="font-size: 10px; color: var(--text-secondary);">Tap to expand map</span>
-                        </div>
-                    </div>
-
-                    <div class="quick-actions">
-                        <div class="q-action" onclick="updateGPSBackground()">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                            <span>Share Loc</span>
-                        </div>
-                        <div class="q-action" onclick="switchTab('messages')">
-                            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                            <span>New DM</span>
-                        </div>
-                        <div class="q-action" onclick="openModal()">
-                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3z"/></svg>
-                            <span>New Circle</span>
-                        </div>
-                        <div class="q-action" onclick="switchTab('spotlight')">
-                            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                            <span>Spotlight</span>
-                        </div>
-                        <div class="q-action" onclick="switchTab('more')">
-                            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 14h-2v-2h2zm0-4h-2V7h2z"/></svg>
-                            <span>Track AI</span>
-                        </div>
-                    </div>
-
-                    <div class="view-container">
-                        <div class="stories-header">
-                            Quick Access <span>View All &gt;</span>
-                        </div>
-                        <div class="stories-row">
-                            <div class="story-item" onclick="alert('Story upload')">
-                                <div class="story-ring add">＋</div>
-                                <span>Add Story</span>
-                            </div>
-                            <div class="story-item">
-                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"></div>
-                                <span>My Story</span>
-                            </div>
-                            <div class="story-item">
-                                <div class="story-ring"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"></div>
-                                <span>Godspower</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="circle-banner">
-                        <p style="font-size: 10px; color: var(--accent-mint); font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">You're part of</p>
-                        <h3>The Dreamers Circle</h3>
-                        <p>12 active members • 3.4 km away</p>
-                        <button class="btn-view-circle" onclick="switchTab('circles')">View Circle &rarr;</button>
-                    </div>
-
-                    <div class="ai-box">
-                        <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
-                            Track AI <span style="font-size: 9px; background: rgba(25,230,160,0.1); color: var(--accent-mint); padding: 2px 6px; border-radius: 4px;">Beta</span>
-                        </h4>
-                        <p style="font-size: 11px; color: var(--text-secondary); margin: 6px 0 12px;">Ask anything... • Plan weekend trip, study tips</p>
-                        <div class="ai-input-wrap">
-                            <input type="text" id="ai-prompt" placeholder="Type a message..." />
-                            <button class="ai-send-btn" onclick="sendAiPrompt()">
-                                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            } else if (tab === 'spotlight') {
-                viewEl.innerHTML = `
-                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">✨ Spotlight Video Feed</div>
-                    <div class="spotlight-container">
-                        <div class="spotlight-card">
-                            <div class="spotlight-video-mock">
-                                <div class="spotlight-overlay"></div>
-                                <div class="spotlight-info">
-                                    <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 4px;">@godspower_dev</h4>
-                                    <p style="font-size: 12px; color: var(--text-secondary);">Building the future of social apps on mobile! 🚀 #TrackCircle</p>
-                                </div>
-                                <div class="spotlight-actions">
-                                    <div class="spotlight-action-btn" onclick="alert('Liked video!')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-                                    <div class="spotlight-action-btn" onclick="alert('Opening comments...')"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (tab === 'circles') {
-                viewEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                        <div style="font-size: 18px; font-weight: 800;">Circle Management</div>
-                        <button class="btn-view-circle" onclick="openModal()">+ New Circle</button>
-                    </div>
-                    <div class="dash-card">
-                        <h3 style="color: var(--accent-mint); margin-bottom: 6px;">The Dreamers Circle</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Active tracking session enabled (12 Members).</p>
-                        <button class="pill-btn btn-outline" style="padding: 8px; font-size: 12px;" onclick="alert('Join Code: TRK-8821')">View Join Code</button>
-                    </div>
-                `;
-            } else if (tab === 'map') {
-                viewEl.innerHTML = `
-                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 18px;">Live GPS Radar Map</div>
-                    <div class="dash-card" style="height: 420px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80') center/cover;">
-                        <div style="background: rgba(8,11,16,0.88); padding: 24px; border-radius: 18px; text-align: center; border: 1px solid var(--border-color);">
-                            <div class="dot-pulse" style="margin: 0 auto 12px; width: 12px; height: 12px;"></div>
-                            <h4 style="color: var(--text-main); margin-bottom: 6px;">Satellite Lock Active</h4>
-                            <p style="font-size: 11px; color: var(--text-secondary);">Broadcasting coordinates to Supabase.</p>
-                        </div>
-                    </div>
-                `;
-            } else if (tab === 'messages') {
-                viewEl.innerHTML = `
-                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Direct Messages & Groups</div>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; height: 480px; display: flex; flex-direction: column; overflow: hidden;">
-                        <div id="msg-list" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">Loading messages...</div>
-                        <div style="display: flex; padding: 12px; background: var(--bg-main); border-top: 1px solid var(--border-color); gap: 10px;">
-                            <input type="text" id="chat-input" placeholder="Type a message..." style="margin:0; padding: 12px 16px;" />
-                            <button onclick="sendChatMessage()" style="background: var(--accent-mint); border: none; padding: 0 18px; border-radius: 12px; font-weight: 700; cursor: pointer; color: var(--bg-main);">Send</button>
-                        </div>
-                    </div>
-                `;
-                fetchMessages();
-            } else if (tab === 'profile') {
-                viewEl.innerHTML = `
-                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 18px;">Account Settings</div>
-                    <div class="dash-card" style="text-align: center; padding: 35px 20px;">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" style="width: 84px; height: 84px; border-radius: 50%; border: 2px solid var(--accent-mint); margin: 0 auto 16px; object-fit: cover;">
-                        <h3 id="profile-email-lbl" style="margin-bottom: 6px;">User Profile</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 25px;">Track Circle Member</p>
-                        <button class="pill-btn" style="background: var(--danger); color: #fff; max-width: 200px; margin: 0 auto;" onclick="logout()">Sign Out</button>
-                    </div>
-                `;
-                supabaseClient.auth.getUser().then(({data}) => {
-                    if (data.user) document.getElementById('profile-email-lbl').innerText = data.user.email;
-                });
-            } else if (tab === 'more') {
-                viewEl.innerHTML = `
-                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 18px;">More & Safety</div>
-                    <div class="dash-card" style="display: flex; flex-direction: column; gap: 16px; padding: 22px;">
-                        <p style="font-weight: 600; cursor: pointer;" onclick="switchTab('spotlight')">✨ Spotlight Video Feed</p>
-                        <p style="font-weight: 600; cursor: pointer;">🔒 Privacy & Location Settings</p>
-                        <p style="font-weight: 600; cursor: pointer;">📜 Terms of Service</p>
-                        <p style="font-weight: 600; color: var(--danger); cursor: pointer;">⚠️ Delete Account</p>
-                    </div>
-                `;
-            }
-        }
-
-        async function fetchMessages() {
-            const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
-            const list = document.getElementById('msg-list');
-            if (!list) return;
-            list.innerHTML = '';
-            if (!data || data.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-secondary); text-align:center; margin-top: 40px;">No messages yet.</p>';
-                return;
-            }
-            data.forEach(m => {
-                const div = document.createElement('div');
-                div.style.background = '#182232';
-                div.style.padding = '12px 16px';
-                div.style.borderRadius = '12px';
-                div.style.fontSize = '13px';
-                div.style.border = '1px solid var(--border-color)';
-                div.innerHTML = `<span style="color:var(--accent-mint); font-size:10px; display:block; font-weight:700; margin-bottom: 4px;">${m.sender_email}</span>${m.content}`;
-                list.appendChild(div);
-            });
-            list.scrollTop = list.scrollHeight;
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const val = input.value.trim();
-            if (!val) return;
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-            await supabaseClient.from('messages').insert({ sender_email: user.email, content: val });
-            input.value = '';
-            fetchMessages();
-        }
-
-        function sendAiPrompt() {
-            const prompt = document.getElementById('ai-prompt').value;
-            if (prompt) {
-                alert('Track AI Query Received: "' + prompt + '"');
-                document.getElementById('ai-prompt').value = '';
-            }
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            location.reload();
         }
     </script>
 </body>
