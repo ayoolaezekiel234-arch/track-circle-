@@ -115,6 +115,15 @@
             box-shadow: 0 4px 15px rgba(25,230,160,0.4); margin-top: -16px; cursor: pointer; border: none;
         }
         .dot-pulse { width: 8px; height: 8px; background: var(--accent-mint); border-radius: 50%; box-shadow: 0 0 10px var(--accent-mint); display: inline-block; }
+
+        /* Chat Styles */
+        .chat-box { width: 100%; flex: 1; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; height: 400px; }
+        .messages-list { flex: 1; padding: 15px; overflow-y: auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+        .message-item { background: #182232; padding: 10px 14px; border-radius: 10px; max-width: 85%; font-size: 13px; border: 1px solid var(--border-color); }
+        .message-item span { display: block; font-size: 10px; color: var(--accent-mint); margin-bottom: 4px; font-weight: 700; }
+        .chat-input-area { display: flex; padding: 10px; background: var(--bg-main); border-top: 1px solid var(--border-color); gap: 10px; }
+        .chat-input-area input { margin: 0; flex: 1; padding: 12px; }
+        .chat-input-area button { width: 80px; margin: 0; background: var(--accent-mint); border: none; border-radius: 10px; color: var(--bg-main); font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -291,29 +300,70 @@
             syncDeviceGPS();
         }
 
-        // --- REAL GPS DEVICE TRACKING & SUPABASE SYNC ---
         function syncDeviceGPS() {
-            if (!navigator.geolocation) {
-                console.warn('Geolocation is not supported by your browser');
-                return;
-            }
+            if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) return;
+                await supabaseClient.from('user_locations').upsert({ 
+                    user_id: user.id, 
+                    latitude: position.coords.latitude, 
+                    longitude: position.coords.longitude, 
+                    updated_at: new Date() 
+                }, { onConflict: 'user_id' });
+            });
+        }
 
-                await supabaseClient
-                    .from('user_locations')
-                    .upsert({ 
-                        user_id: user.id, 
-                        latitude: lat, 
-                        longitude: lon, 
-                        updated_at: new Date() 
-                    }, { onConflict: 'user_id' });
-            }, (error) => {
-                console.warn('GPS permission denied or unavailable:', error.message);
-            }, { enableHighAccuracy: true });
+        // --- REALTIME CHAT FUNCTIONS ---
+        async function loadChatMessages() {
+            const listEl = document.getElementById('msg-list');
+            if (!listEl) return;
+
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(50);
+
+            if (error) {
+                listEl.innerHTML = `<p style="color: var(--danger); font-size: 12px;">Error: ${error.message}</p>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            if (data.length === 0) {
+                listEl.innerHTML = `<p style="color: var(--text-secondary); text-align: center; font-size: 12px; margin-top: 20px;">No messages yet. Start the conversation!</p>`;
+                return;
+            }
+
+            data.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'message-item';
+                div.innerHTML = `<span>${msg.sender_email}</span>${msg.content}`;
+                listEl.appendChild(div);
+            });
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const content = inputEl.value.trim();
+            if (!content) return;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabaseClient.from('messages').insert({
+                sender_email: user.email,
+                content: content
+            });
+
+            if (!error) {
+                inputEl.value = '';
+                loadChatMessages();
+            } else {
+                alert('Failed to send: ' + error.message);
+            }
         }
 
         function switchTab(tab, el) {
@@ -357,8 +407,15 @@
             } else if (tab === 'messages') {
                 viewEl.innerHTML = `
                     <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">Private Messages & DMs</h2>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Secure real-time conversations.</p>
+                    <div class="chat-box">
+                        <div class="messages-list" id="msg-list">Loading secure message history...</div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Type a message..." />
+                            <button onclick="sendChatMessage()">Send</button>
+                        </div>
+                    </div>
                 `;
+                loadChatMessages();
             } else if (tab === 'profile') {
                 viewEl.innerHTML = `
                     <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">User Profile</h2>
