@@ -125,9 +125,19 @@
 
         .ai-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; }
         .ai-input-wrap { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 14px; padding: 10px 14px; margin-top: 12px; }
-        .ai-input-wrap input { background: none; border: none; margin: 0; font-size: 13px; color: var(--text-main); padding: 0; }
+        .ai-input-wrap input { background: none; border: none; margin: 0; font-size: 13px; color: var(--text-main); padding: 0; flex: 1; }
         .ai-send-btn { width: 32px; height: 32px; background: var(--accent-mint); border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         .ai-send-btn svg { width: 14px; height: 14px; fill: var(--bg-main); }
+
+        /* Spotlight Feed styles */
+        .spotlight-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 400px; margin: 0 auto; }
+        .spotlight-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; position: relative; }
+        .spotlight-video-mock { height: 420px; background: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80') center/cover; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; position: relative; }
+        .spotlight-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(8,11,16,0.9), transparent 60%); }
+        .spotlight-info { position: relative; z-index: 2; }
+        .spotlight-actions { position: absolute; right: 15px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; z-index: 3; align-items: center; }
+        .spotlight-action-btn { width: 42px; height: 42px; background: rgba(16,21,29,0.8); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; }
+        .spotlight-action-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
         /* --- BOTTOM NAVIGATION BAR --- */
         .nav-bar {
@@ -197,7 +207,7 @@
         </div>
     </div>
 
-    <!-- 2. MAIN APPLICATION DASHBOARD -->
+    <!-- 2. MAIN APP DASHBOARD -->
     <div id="app-dashboard">
         <div class="app-header">
             <div class="header-left">
@@ -454,10 +464,29 @@
                         </h4>
                         <p style="font-size: 11px; color: var(--text-secondary); margin: 6px 0 12px;">Ask anything... • Plan weekend trip, study tips</p>
                         <div class="ai-input-wrap">
-                            <input type="text" id="ai-prompt" placeholder="Type a message..." style="background:none; border:none; color:var(--text-main);" />
+                            <input type="text" id="ai-prompt" placeholder="Type a message..." />
                             <button class="ai-send-btn" onclick="sendAiPrompt()">
                                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
                             </button>
+                        </div>
+                    </div>
+                `;
+            } else if (tab === 'spotlight') {
+                viewEl.innerHTML = `
+                    <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">✨ Spotlight Video Feed</div>
+                    <div class="spotlight-container">
+                        <div class="spotlight-card">
+                            <div class="spotlight-video-mock">
+                                <div class="spotlight-overlay"></div>
+                                <div class="spotlight-info">
+                                    <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 4px;">@godspower_dev</h4>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">Building the future of social apps on mobile! 🚀 #TrackCircle</p>
+                                </div>
+                                <div class="spotlight-actions">
+                                    <div class="spotlight-action-btn" onclick="alert('Liked video!')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                                    <div class="spotlight-action-btn" onclick="alert('Opening comments...')"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -513,9 +542,9 @@
                 viewEl.innerHTML = `
                     <div style="font-size: 18px; font-weight: 800; margin-bottom: 18px;">More & Safety</div>
                     <div class="dash-card" style="display: flex; flex-direction: column; gap: 16px; padding: 22px;">
+                        <p style="font-weight: 600; cursor: pointer;" onclick="switchTab('spotlight')">✨ Spotlight Video Feed</p>
                         <p style="font-weight: 600; cursor: pointer;">🔒 Privacy & Location Settings</p>
                         <p style="font-weight: 600; cursor: pointer;">📜 Terms of Service</p>
-                        <p style="font-weight: 600; cursor: pointer;">🤖 Track AI Preferences</p>
                         <p style="font-weight: 600; color: var(--danger); cursor: pointer;">⚠️ Delete Account</p>
                     </div>
                 `;
