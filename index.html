@@ -264,15 +264,15 @@
         </div>
     </div>
 
-    <!-- POST CREATION MODAL -->
+    <!-- POST CREATION MODAL (DIRECT GALLERY PICKER) -->
     <div class="post-modal" id="post-modal">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="font-size: 16px; color: var(--accent-mint);">Create Track Post 📸</h3>
+            <h3 style="font-size: 16px; color: var(--accent-mint);">Create Track Post 📱</h3>
             <button onclick="closePostModal()" style="background:none; border:none; color:var(--text-main); font-size:20px; cursor:pointer;">&times;</button>
         </div>
         <div class="input-group">
-            <label>Photo / Video URL (Gallery Link)</label>
-            <input type="text" id="post-media-url" placeholder="https://images.unsplash.com/..." />
+            <label>Select Photo or Video from Gallery</label>
+            <input type="file" id="post-file-input" accept="image/*,video/*" style="padding: 10px;" />
         </div>
         <div class="input-group">
             <label>Caption</label>
@@ -540,9 +540,17 @@
         function closePostModal() { document.getElementById('post-modal').style.display = 'none'; }
 
         async function publishTrackPost() {
-            const mediaUrl = document.getElementById('post-media-url').value.trim();
+            const fileInput = document.getElementById('post-file-input');
             const caption = document.getElementById('post-caption').value.trim();
-            if (!mediaUrl) { alert('Please enter a photo or video URL'); return; }
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a photo or video from your gallery.');
+                return;
+            }
+
+            // Read local file using File API for immediate preview & publishing
+            const localFile = fileInput.files[0];
+            const mediaUrl = URL.createObjectURL(localFile);
 
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
@@ -555,7 +563,7 @@
             });
 
             if (!error) {
-                alert('Post published successfully to Track Feed!');
+                alert('Post published successfully from your gallery!');
                 closePostModal();
                 switchTab('track');
             } else {
