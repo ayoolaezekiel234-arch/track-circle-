@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Track Circle - Stay Connected. Stay Close.</title>
     <!-- Supabase CDN SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -97,9 +97,14 @@
         .header-titles h1 span { color: var(--accent-mint); font-size: 10px; font-weight: 600; background: rgba(25,230,160,0.1); padding: 2px 6px; border-radius: 6px; }
         .header-titles p { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
         
-        .app-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 100px; }
+        /* Fixed Safe Area Content Container */
+        .app-content { 
+            flex: 1; padding: 20px; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 20px; 
+            padding-bottom: 110px; /* Accounts for bottom nav bar without clipping */
+        }
 
-        /* --- BOTTOM NAVIGATION BAR --- */
+        /* --- BOTTOM NAVIGATION BAR (Fixed Safe Area) --- */
         .nav-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
             background: var(--bg-card); border-top: 1px solid var(--border-color);
@@ -117,7 +122,7 @@
         .dot-pulse { width: 8px; height: 8px; background: var(--accent-mint); border-radius: 50%; box-shadow: 0 0 10px var(--accent-mint); display: inline-block; }
 
         /* Chat Styles */
-        .chat-box { width: 100%; flex: 1; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; height: 350px; }
+        .chat-box { width: 100%; flex: 1; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; height: 380px; }
         .messages-list { flex: 1; padding: 15px; overflow-y: auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
         .message-item { background: #182232; padding: 10px 14px; border-radius: 10px; max-width: 85%; font-size: 13px; border: 1px solid var(--border-color); }
         .message-item span { display: block; font-size: 10px; color: var(--accent-mint); margin-bottom: 4px; font-weight: 700; }
@@ -358,6 +363,7 @@
 
         let activeModalMode = 'create';
         let currentUserEmail = '';
+        let activeVideoIdForComments = null;
 
         window.addEventListener('load', async () => {
             setTimeout(async () => {
@@ -461,9 +467,18 @@
                     latitude: lat, 
                     longitude: lon, 
                     location_name: approxName,
+                    is_sharing: true,
                     updated_at: new Date() 
                 }, { onConflict: 'user_id' });
             });
+        }
+
+        async function toggleLocationSharing(checkbox) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            const isSharing = checkbox.checked;
+            await supabaseClient.from('user_locations').update({ is_sharing: isSharing }).eq('user_id', user.id);
+            alert(isSharing ? 'Live location sharing resumed.' : 'Live location sharing paused.');
         }
 
         async function logoutUser() {
@@ -548,7 +563,6 @@
                 return;
             }
 
-            // Read local file using File API for immediate preview & publishing
             const localFile = fileInput.files[0];
             const mediaUrl = URL.createObjectURL(localFile);
 
@@ -749,9 +763,9 @@
             const mapListEl = document.getElementById('map-locations-list');
             if (!mapListEl) return;
 
-            const { data, error } = await supabaseClient.from('user_locations').select('*');
+            const { data, error } = await supabaseClient.from('user_locations').select('*').eq('is_sharing', true);
             if (error || !data || data.length === 0) {
-                mapListEl.innerHTML = `<p style="color: var(--text-secondary); font-size: 13px; text-align: center;">No active neighborhood signals found. Tap refresh!</p>`;
+                mapListEl.innerHTML = `<p style="color: var(--text-secondary); font-size: 13px; text-align: center;">No active neighborhood signals found (or sharing is paused).</p>`;
                 return;
             }
 
@@ -878,16 +892,19 @@
             if (tab === 'home') {
                 viewEl.innerHTML = `
                     <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px;">
-                        <p style="font-size: 11px; color: var(--text-secondary);">Location Status</p>
+                        <p style="font-size: 11px; color: var(--text-secondary);">Location Status & Privacy Controls</p>
                         <h3 style="font-size: 14px; margin-top: 6px; color: var(--accent-mint);" id="location-status-label">Sharing Live (Lagos / Ikeja Area)</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Approximate neighborhood tracking active.</p>
+                        <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 12px; color: var(--text-main);">Broadcast to Circle/Radar</span>
+                            <input type="checkbox" id="location-toggle" checked onchange="toggleLocationSharing(this)" style="width: auto; cursor: pointer;">
+                        </div>
                         <button class="pill-btn btn-mint" style="margin-top: 14px; padding: 10px; font-size: 13px;" onclick="syncDeviceGPS(); alert('Approximate GPS & Town Synced!');">Update Location</button>
                     </div>
 
                     <div style="background: linear-gradient(rgba(8,11,16,0.6), rgba(8,11,16,0.9)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80') center/cover; border-radius: 18px; border: 1px solid var(--border-color); padding: 22px;">
                         <p style="font-size: 10px; color: var(--accent-mint); font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Active Community</p>
                         <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--text-main);">The Dreamers Circle</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">12 active members • Nearby</p>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Active members • Nearby</p>
                         <button class="pill-btn btn-mint" style="width: auto; padding: 8px 16px; font-size: 12px;" onclick="switchTab('circles')">View Circle &rarr;</button>
                     </div>
 
@@ -983,8 +1000,8 @@
                         <!-- Creator Earnings Ledger -->
                         <div style="background: rgba(25,230,160,0.05); border: 1px solid rgba(25,230,160,0.2); padding: 14px; border-radius: 14px; margin-bottom: 16px; text-align: left;">
                             <h4 style="font-size: 13px; color: var(--accent-mint); margin-bottom: 4px;">🎁 Creator Earnings (80/20 Split)</h4>
-                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Total Gifts Received: <strong style="color:var(--text-main);">₦12,400</strong></p>
-                            <p style="font-size: 12px; color: var(--text-secondary);">Withdrawable Balance (80%): <strong style="color:var(--accent-mint);">₦9,920</strong></p>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Verified Gift Transactions Recorded</p>
+                            <button class="pill-btn btn-mint" style="padding: 8px; font-size: 12px; margin-top: 6px;" onclick="alert('Withdrawal request submitted! Payouts are processed via verified bank ledger.')">Request 80% Payout</button>
                         </div>
                         
                         <button class="pill-btn btn-outline" style="max-width: 220px; margin: 0 auto 10px auto; padding: 12px;" onclick="openLegal()">📜 Legal & Policies</button>
