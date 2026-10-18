@@ -97,14 +97,13 @@
         .header-titles h1 span { color: var(--accent-mint); font-size: 10px; font-weight: 600; background: rgba(25,230,160,0.1); padding: 2px 6px; border-radius: 6px; }
         .header-titles p { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
         
-        /* Fixed Safe Area Content Container */
         .app-content { 
             flex: 1; padding: 20px; overflow-y: auto; 
             display: flex; flex-direction: column; gap: 20px; 
-            padding-bottom: 110px; /* Accounts for bottom nav bar without clipping */
+            padding-bottom: 110px;
         }
 
-        /* --- BOTTOM NAVIGATION BAR (Fixed Safe Area) --- */
+        /* --- BOTTOM NAVIGATION BAR --- */
         .nav-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 75px;
             background: var(--bg-card); border-top: 1px solid var(--border-color);
@@ -264,6 +263,10 @@
                 <label id="modal-label-text">Circle Name</label>
                 <input type="text" id="modal-input-val" placeholder="e.g. Family Trip" />
             </div>
+            <div class="input-group" id="modal-avatar-group">
+                <label>Circle Avatar URL</label>
+                <input type="text" id="modal-input-avatar" placeholder="https://images.unsplash.com/..." />
+            </div>
             <button class="pill-btn btn-mint" onclick="submitCircleAction()" style="margin-top: 10px;" id="modal-submit-btn">Save Circle</button>
             <button class="pill-btn btn-outline" onclick="closeModal()" style="margin-bottom: 0;">Cancel</button>
         </div>
@@ -363,7 +366,8 @@
 
         let activeModalMode = 'create';
         let currentUserEmail = '';
-        let activeVideoIdForComments = null;
+        let activeGroupId = null;
+        let activeGroupName = '';
 
         window.addEventListener('load', async () => {
             setTimeout(async () => {
@@ -661,6 +665,80 @@
             }
         }
 
+        // --- GROUP CHAT ROOM FUNCTIONS ---
+        async function openGroupChat(groupId, groupName) {
+            activeGroupId = groupId;
+            activeGroupName = groupName;
+            const viewEl = document.getElementById('main-view-area');
+            
+            viewEl.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <h2 style="font-size: 16px; font-weight: 800; color: var(--accent-mint);">💬 ${groupName} Group Chat</h2>
+                    <button class="pill-btn btn-outline" style="width: auto; padding: 6px 12px; font-size: 11px; margin:0;" onclick="switchTab('circles')">&larr; Back to Circles</button>
+                </div>
+                <div class="chat-box" style="height: 420px;">
+                    <div class="messages-list" id="group-msg-list">Loading circle conversation...</div>
+                    <div class="chat-input-area">
+                        <input type="text" id="group-chat-input" placeholder="Message group..." />
+                        <button onclick="sendGroupMessage()">Send</button>
+                    </div>
+                </div>
+            `;
+            loadGroupMessages();
+        }
+
+        async function loadGroupMessages() {
+            const listEl = document.getElementById('group-msg-list');
+            if (!listEl || !activeGroupId) return;
+
+            const { data, error } = await supabaseClient
+                .from('group_messages')
+                .select('*')
+                .eq('group_id', activeGroupId)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                listEl.innerHTML = `<p style="color: var(--danger); font-size: 12px;">Error: ${error.message}</p>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            if (data.length === 0) {
+                listEl.innerHTML = `<p style="color: var(--text-secondary); text-align: center; font-size: 12px; margin-top: 20px;">No messages in ${activeGroupName} yet. Say hello!</p>`;
+                return;
+            }
+
+            data.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'message-item';
+                div.innerHTML = `<span>${msg.sender_email}</span>${msg.content}`;
+                listEl.appendChild(div);
+            });
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        async function sendGroupMessage() {
+            const inputEl = document.getElementById('group-chat-input');
+            const content = inputEl.value.trim();
+            if (!content || !activeGroupId) return;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabaseClient.from('group_messages').insert({
+                group_id: activeGroupId,
+                sender_email: user.email,
+                content: content
+            });
+
+            if (!error) {
+                inputEl.value = '';
+                loadGroupMessages();
+            } else {
+                alert('Failed to send message: ' + error.message);
+            }
+        }
+
         // --- REAL GEMINI AI ASSISTANT ---
         async function sendAiPrompt() {
             const promptInput = document.getElementById('ai-prompt');
@@ -677,20 +755,23 @@
             }, 600);
         }
 
-        // --- CIRCLES MANAGEMENT (CREATE & JOIN) ---
+        // --- CIRCLES MANAGEMENT (CREATE, JOIN, LEAVE, DELETE) ---
         function openModal(mode) {
             activeModalMode = mode;
             document.getElementById('modal-overlay').style.display = 'flex';
+            const avatarGroup = document.getElementById('modal-avatar-group');
             if (mode === 'create') {
                 document.getElementById('modal-title-text').innerText = 'Create New Circle';
                 document.getElementById('modal-label-text').innerText = 'Circle Name';
                 document.getElementById('modal-input-val').placeholder = 'e.g. Family Trip';
                 document.getElementById('modal-submit-btn').innerText = 'Save Circle';
+                if (avatarGroup) avatarGroup.style.display = 'block';
             } else {
                 document.getElementById('modal-title-text').innerText = 'Join Circle';
                 document.getElementById('modal-label-text').innerText = 'Join Code';
                 document.getElementById('modal-input-val').placeholder = 'e.g. TRK-9921';
                 document.getElementById('modal-submit-btn').innerText = 'Join Circle';
+                if (avatarGroup) avatarGroup.style.display = 'none';
             }
         }
         function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
@@ -704,7 +785,15 @@
 
             if (activeModalMode === 'create') {
                 const joinCode = 'TRK-' + Math.floor(1000 + Math.random() * 9000);
-                const { data: grpData, error } = await supabaseClient.from('groups').insert({ name: val, join_code: joinCode }).select().single();
+                const avatarUrl = document.getElementById('modal-input-avatar').value.trim() || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80';
+                
+                const { data: grpData, error } = await supabaseClient.from('groups').insert({ 
+                    name: val, 
+                    join_code: joinCode, 
+                    creator_email: user.email,
+                    group_avatar: avatarUrl 
+                }).select().single();
+
                 if (!error && grpData) {
                     await supabaseClient.from('group_members').insert({ group_id: grpData.id, member_email: user.email });
                     alert(`Circle created! Join Code: ${joinCode}`);
@@ -719,16 +808,40 @@
                     alert('Invalid join code. Please check and try again.');
                     return;
                 }
-                await supabaseClient.from('group_members').insert({ group_id: grpData.id, member_email: user.email });
+                const { data: existing } = await supabaseClient.from('group_members').select('*').eq('group_id', grpData.id).eq('member_email', user.email).single();
+                if (!existing) {
+                    await supabaseClient.from('group_members').insert({ group_id: grpData.id, member_email: user.email });
+                }
                 alert(`Successfully joined circle: ${grpData.name}!`);
                 closeModal();
                 switchTab('circles');
             }
         }
 
+        async function leaveCircle(groupId, groupName) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            if (!confirm(`Are you sure you want to leave ${groupName}?`)) return;
+
+            await supabaseClient.from('group_members').delete().eq('group_id', groupId).eq('member_email', user.email);
+            alert(`You have left ${groupName}.`);
+            switchTab('circles');
+        }
+
+        async function deleteCircle(groupId, groupName) {
+            if (!confirm(`Are you sure you want to delete the entire circle session "${groupName}"? This action cannot be undone.`)) return;
+
+            await supabaseClient.from('groups').delete().eq('id', groupId);
+            alert(`Circle "${groupName}" deleted successfully.`);
+            switchTab('circles');
+        }
+
         async function loadUserCircles() {
             const listEl = document.getElementById('circles-list');
             if (!listEl) return;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
 
             const { data, error } = await supabaseClient.from('groups').select('*').order('created_at', { ascending: false });
             if (error) {
@@ -743,6 +856,7 @@
             }
 
             data.forEach(group => {
+                const isCreator = group.creator_email === user.email;
                 const card = document.createElement('div');
                 card.style.background = 'var(--bg-card)';
                 card.style.border = '1px solid var(--border-color)';
@@ -750,9 +864,18 @@
                 card.style.padding = '16px';
                 card.style.marginBottom = '12px';
                 card.innerHTML = `
-                    <h3 style="color: var(--accent-mint); margin-bottom: 4px; font-size: 16px;">${group.name}</h3>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Join Code: <strong style="color:var(--text-main);">${group.join_code || 'TRK-9921'}</strong></p>
-                    <button class="pill-btn btn-outline" style="padding: 8px 14px; font-size: 12px; width: auto; margin:0;" onclick="alert('Viewing active tracking session for ${group.name}')">View Session</button>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 10px;">
+                        <img src="${group.group_avatar || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=150&q=80'}" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;">
+                        <div>
+                            <h3 style="color: var(--accent-mint); font-size: 15px; margin-bottom: 2px;">${group.name}</h3>
+                            <p style="font-size: 11px; color: var(--text-secondary);">Join Code: <strong style="color:var(--text-main);">${group.join_code || 'TRK-9921'}</strong></p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="pill-btn btn-mint" style="padding: 8px 14px; font-size: 12px; width: auto; margin:0;" onclick="openGroupChat('${group.id}', '${group.name}')">💬 Open Group Chat</button>
+                        <button class="pill-btn btn-outline" style="padding: 8px 14px; font-size: 12px; width: auto; margin:0; border-color: var(--danger); color: var(--danger);" onclick="leaveCircle('${group.id}', '${group.name}')">Leave</button>
+                        ${isCreator ? `<button class="pill-btn btn-outline" style="padding: 8px 14px; font-size: 12px; width: auto; margin:0; background: rgba(255,92,92,0.1);" onclick="deleteCircle('${group.id}', '${group.name}')">Delete Group</button>` : ''}
+                    </div>
                 `;
                 listEl.appendChild(card);
             });
