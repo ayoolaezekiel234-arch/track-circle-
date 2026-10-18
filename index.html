@@ -272,7 +272,7 @@
         </div>
     </div>
 
-    <!-- POST CREATION MODAL (DIRECT GALLERY PICKER) -->
+    <!-- POST CREATION MODAL (CLOUD STORAGE GALLERY UPLOAD) -->
     <div class="post-modal" id="post-modal">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="font-size: 16px; color: var(--accent-mint);">Create Track Post 📱</h3>
@@ -568,24 +568,41 @@
             }
 
             const localFile = fileInput.files[0];
-            const mediaUrl = URL.createObjectURL(localFile);
+            const fileExt = localFile.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            alert('Uploading media to cloud storage...');
+
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                .from('track-media')
+                .upload(filePath, localFile);
+
+            if (uploadError) {
+                alert('Upload failed: ' + uploadError.message);
+                return;
+            }
+
+            const { data: { publicUrl } } = supabaseClient.storage
+                .from('track-media')
+                .getPublicUrl(filePath);
 
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
 
-            const { error } = await supabaseClient.from('videos').insert({
+            const { error: dbError } = await supabaseClient.from('videos').insert({
                 creator_email: user.email,
-                video_url: mediaUrl,
+                video_url: publicUrl,
                 caption: caption,
                 likes_count: 0
             });
 
-            if (!error) {
-                alert('Post published successfully from your gallery!');
+            if (!dbError) {
+                alert('Post published successfully to the cloud feed!');
                 closePostModal();
                 switchTab('track');
             } else {
-                alert('Error publishing post: ' + error.message);
+                alert('Error saving post to database: ' + dbError.message);
             }
         }
 
@@ -739,7 +756,7 @@
             }
         }
 
-        // --- REAL GEMINI AI ASSISTANT ---
+        // --- LIVE GEMINI AI ASSISTANT (SUPABASE EDGE FUNCTION) ---
         async function sendAiPrompt() {
             const promptInput = document.getElementById('ai-prompt');
             const respBox = document.getElementById('ai-response');
@@ -749,10 +766,18 @@
             respBox.style.display = 'block';
             respBox.innerText = 'Track AI is thinking...';
 
-            setTimeout(() => {
-                respBox.innerText = `Track AI: Regarding "${query}", I'm fully equipped to help you coordinate with friends, manage study timetables, or navigate your circles! 🚀`;
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('track-circle-ai', {
+                    body: { prompt: query }
+                });
+
+                if (error) throw error;
+
+                respBox.innerText = `Track AI: ${data.reply}`;
                 promptInput.value = '';
-            }, 600);
+            } catch (err) {
+                respBox.innerText = `Track AI Error: Could not reach live assistant (${err.message}).`;
+            }
         }
 
         // --- CIRCLES MANAGEMENT (CREATE, JOIN, LEAVE, DELETE) ---
